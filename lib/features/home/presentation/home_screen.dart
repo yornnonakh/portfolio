@@ -28,7 +28,7 @@ class HomeScreen extends ConsumerWidget {
     final wide = MediaQuery.sizeOf(context).width >= 900;
     void showProjects() {
       ref.read(projectFilterProvider.notifier).select(ProjectCategory.all);
-      ref.read(navigationProvider.notifier).select(MainTab.projects);
+      ref.read(navigationProvider.notifier).select(MainTab.project);
     }
 
     // The smallest reference uses a denser profile-first layout. Keeping this
@@ -74,7 +74,7 @@ class HomeScreen extends ConsumerWidget {
           title: 'Skills and stack',
           action: 'Explore',
           onAction: () =>
-              ref.read(navigationProvider.notifier).select(MainTab.skills),
+              ref.read(navigationProvider.notifier).select(MainTab.skill),
         ),
         const ToolboxCard(),
       ],

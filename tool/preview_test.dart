@@ -67,9 +67,8 @@ void main() {
     await capture('home_compact');
     tester.view.physicalSize = const Size(390, 844);
     for (final tab in [
-      MainTab.dashboard,
-      MainTab.projects,
-      MainTab.skills,
+      MainTab.project,
+      MainTab.skill,
       MainTab.contact,
     ]) {
       await tester.tap(find.byKey(ValueKey('nav-${tab.name}')));
