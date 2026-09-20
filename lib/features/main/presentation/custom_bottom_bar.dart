@@ -46,13 +46,7 @@ class NavigationItem extends ConsumerWidget {
     final foreground = selected
         ? AppColors.ink
         : AppColors.textSecondary.withValues(alpha: .82);
-    final label = compact && selected
-        ? (tab == MainTab.home
-              ? 'Profile'
-              : tab == MainTab.dashboard
-              ? 'Dash'
-              : tab.label)
-        : tab.label;
+    final label = tab.label;
     final radius = BorderRadius.circular(
       horizontal
           ? 16
@@ -113,30 +107,12 @@ class NavigationItem extends ConsumerWidget {
                         ),
                       ],
                     )
-                  : Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Icon(icon, size: compact ? 18 : 22, color: foreground),
-                        if (!compact || selected) ...[
-                          const SizedBox(height: 4),
-                          SizedBox(
-                            width: double.infinity,
-                            height: compact ? 13 : 16,
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Text(
-                                label,
-                                maxLines: 1,
-                                style: TextStyle(
-                                  fontSize: compact ? 10 : 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: foreground,
-                                ),
-                              ),
-                            ),
-                          ),
-                        ],
-                      ],
+                  : Center(
+                      child: Icon(
+                        icon,
+                        size: compact ? 20 : 24,
+                        color: foreground,
+                      ),
                     ),
             ),
           ),
@@ -152,25 +128,21 @@ class NavigationItem extends ConsumerWidget {
   }) {
     if (compact) {
       return switch (tab) {
-        MainTab.dashboard =>
-          selected ? Icons.dashboard_rounded : Icons.dashboard_outlined,
         MainTab.home =>
           selected ? Icons.person_rounded : Icons.person_outline_rounded,
-        MainTab.projects =>
+        MainTab.project =>
           selected ? Icons.group_rounded : Icons.group_outlined,
-        MainTab.skills =>
+        MainTab.skill =>
           selected ? Icons.grid_view_rounded : Icons.grid_view_outlined,
         MainTab.contact =>
           selected ? Icons.mail_rounded : Icons.mail_outline_rounded,
       };
     }
     return switch (tab) {
-      MainTab.dashboard =>
-        selected ? Icons.dashboard_rounded : Icons.dashboard_outlined,
       MainTab.home => selected ? Icons.home_rounded : Icons.home_outlined,
-      MainTab.projects =>
+      MainTab.project =>
         selected ? Icons.grid_view_rounded : Icons.grid_view_outlined,
-      MainTab.skills =>
+      MainTab.skill =>
         selected ? Icons.auto_awesome_rounded : Icons.auto_awesome_outlined,
       MainTab.contact =>
         selected

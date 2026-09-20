@@ -5,7 +5,7 @@ import '../../../core/widgets/availability_badge.dart';
 import '../../../core/widgets/glass_background.dart';
 import '../../../data/portfolio_providers.dart';
 import '../../contact/presentation/contact_screen.dart';
-import '../../dashboard/presentation/dashboard_screen.dart';
+
 import '../../home/presentation/home_screen.dart';
 import '../../projects/presentation/projects_screen.dart';
 import '../../skills/presentation/skills_screen.dart';
@@ -40,7 +40,6 @@ class MainScaffold extends ConsumerWidget {
                         child: IndexedStack(
                           index: tab.index,
                           children: [
-                            const DashboardScreen(),
                             TickerMode(
                               enabled: tab == MainTab.home,
                               child: HomeScreen(

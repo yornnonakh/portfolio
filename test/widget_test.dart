@@ -83,10 +83,6 @@ void main() {
     'primary navigation, filters, empty state and project contact flow work',
     (tester) async {
       await pumpPortfolio(tester);
-      expect(find.text(PortfolioContent.profile.name), findsOneWidget);
-      await selectTab(tester, MainTab.dashboard);
-      expect(find.text('Dashboard'), findsNWidgets(2));
-      expect(find.text('Experience'), findsOneWidget);
       await selectTab(tester, MainTab.home);
       await tester.tap(find.text('View Projects'));
       await tester.pumpAndSettle();
@@ -95,9 +91,9 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('Piisiit Note'), findsOneWidget);
       expect(find.text('TaskFlow'), findsNothing);
-      await selectTab(tester, MainTab.skills);
+      await selectTab(tester, MainTab.skill);
       expect(find.text('Languages & Frameworks'), findsOneWidget);
-      await selectTab(tester, MainTab.projects);
+      await selectTab(tester, MainTab.project);
       expect(find.text('TaskFlow'), findsNothing);
       await tester.tap(find.text('Open source'));
       await tester.pumpAndSettle();

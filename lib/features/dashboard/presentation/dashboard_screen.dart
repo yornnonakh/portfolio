@@ -24,7 +24,7 @@ class DashboardScreen extends ConsumerWidget {
     final experience = ref.watch(experienceProvider);
     final wide = MediaQuery.sizeOf(context).width >= 900;
     void selectProjects() =>
-        ref.read(navigationProvider.notifier).select(MainTab.projects);
+        ref.read(navigationProvider.notifier).select(MainTab.project);
     void selectContact() =>
         ref.read(navigationProvider.notifier).select(MainTab.contact);
 
