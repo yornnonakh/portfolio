@@ -27,7 +27,7 @@ class PageContent extends StatelessWidget {
       key: PageStorageKey(title),
       padding: EdgeInsets.fromLTRB(
         wide ? 48 : 24,
-        wide ? 34 : 24,
+        wide ? 44 : 28,
         wide ? 48 : 24,
         wide || backLabel != null ? 40 : 132,
       ),
@@ -70,7 +70,7 @@ class PageContent extends StatelessWidget {
                   ],
                 ],
               ),
-              const SizedBox(height: 28),
+              const SizedBox(height: 32),
               ...children,
             ],
           ),
@@ -116,7 +116,7 @@ class SectionHeading extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
+      padding: const EdgeInsets.only(bottom: 16),
       child: Row(
         children: [
           Expanded(
@@ -124,8 +124,9 @@ class SectionHeading extends StatelessWidget {
               header: true,
               child: Text(
                 title,
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: AppColors.textSecondary,
+                  fontSize: 18,
                 ),
               ),
             ),

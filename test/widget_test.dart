@@ -119,8 +119,16 @@ void main() {
     ]) {
       await tester.ensureVisible(find.text(label));
       await tester.tap(find.text(label));
-      await tester.pumpAndSettle();
+      if (label == 'Experience') {
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1200));
+      } else {
+        await tester.pumpAndSettle();
+      }
       expect(find.text(expected), findsOneWidget);
+      if (label == 'Experience') {
+        expect(find.text('ACTIVE'), findsOneWidget);
+      }
       await tester.tap(find.text('Home'));
       await tester.pumpAndSettle();
       expect(find.text('Portfolio'), findsOneWidget);
@@ -192,7 +200,12 @@ void main() {
           Navigator.of(
             context,
           ).push(MaterialPageRoute<void>(builder: (_) => page));
-          await tester.pumpAndSettle();
+          if (page is ExperienceScreen) {
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 1200));
+          } else {
+            await tester.pumpAndSettle();
+          }
           expect(tester.takeException(), isNull);
           Navigator.of(tester.element(find.byType(page.runtimeType))).pop();
           await tester.pumpAndSettle();

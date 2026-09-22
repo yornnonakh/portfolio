@@ -9,8 +9,8 @@ class GlassCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(22),
-    this.borderRadius = 26,
-    this.blur = 12,
+    this.borderRadius = 24,
+    this.blur = 28,
     this.onTap,
     this.semanticLabel,
   });
@@ -34,6 +34,13 @@ class GlassCard extends StatelessWidget {
             gradient: AppGradients.glass,
             borderRadius: radius,
             border: Border.all(color: AppColors.glassBorder),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: .12),
+                blurRadius: 30,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
           child: Material(
             type: MaterialType.transparency,
@@ -45,7 +52,7 @@ class GlassCard extends StatelessWidget {
                     child: InkWell(
                       onTap: onTap,
                       borderRadius: radius,
-                      hoverColor: Colors.white.withValues(alpha: .06),
+                      hoverColor: Colors.white.withValues(alpha: .04),
                       splashColor: AppColors.primary.withValues(alpha: .12),
                       child: Padding(padding: padding, child: child),
                     ),

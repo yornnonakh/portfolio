@@ -11,14 +11,14 @@ class TagChip extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .07),
-        borderRadius: BorderRadius.circular(30),
+        color: Colors.white.withValues(alpha: .06),
+        borderRadius: BorderRadius.circular(12),
         border: Border.all(color: AppColors.glassBorder),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: compact ? 12 : 17,
-          vertical: compact ? 6 : 10,
+          horizontal: compact ? 12 : 15,
+          vertical: compact ? 7 : 9,
         ),
         child: Text(
           label,

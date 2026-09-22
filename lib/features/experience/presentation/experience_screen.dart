@@ -4,10 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/page_content.dart';
-import '../../../core/widgets/reveal_text.dart';
-import '../../../core/widgets/tag_chip.dart';
+import '../../../core/widgets/timeline_card.dart';
+import '../../../core/widgets/timeline_entry.dart';
 import '../../../data/models/portfolio.dart';
 import '../../../data/portfolio_providers.dart';
 
@@ -33,8 +32,9 @@ class _AnimatedExperienceTimeline extends StatefulWidget {
 
 class _AnimatedExperienceTimelineState
     extends State<_AnimatedExperienceTimeline>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
+  late final AnimationController _flowController;
   bool _reducedMotion = false;
 
   @override
@@ -44,6 +44,10 @@ class _AnimatedExperienceTimelineState
       vsync: this,
       duration: const Duration(milliseconds: 1050),
     );
+    _flowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3200),
+    );
   }
 
   @override
@@ -52,14 +56,21 @@ class _AnimatedExperienceTimelineState
     _reducedMotion = MediaQuery.disableAnimationsOf(context);
     if (_reducedMotion) {
       _controller.value = 1;
+      _flowController
+        ..stop()
+        ..value = 0;
     } else if (!_controller.isAnimating && !_controller.isCompleted) {
       _controller.forward();
+    }
+    if (!_reducedMotion && !_flowController.isAnimating) {
+      _flowController.repeat(reverse: true);
     }
   }
 
   @override
   void dispose() {
     _controller.dispose();
+    _flowController.dispose();
     super.dispose();
   }
 
@@ -76,8 +87,10 @@ class _AnimatedExperienceTimelineState
             for (var i = 0; i < count; i++)
               _TimelineEntry(
                 experience: widget.experience[i],
-                last: i == count - 1,
+                index: i,
+                count: count,
                 progress: _entryProgress(i, stagger),
+                flow: _flowController,
               ),
           ],
         );
@@ -97,111 +110,86 @@ class _AnimatedExperienceTimelineState
 class _TimelineEntry extends StatelessWidget {
   const _TimelineEntry({
     required this.experience,
-    required this.last,
+    required this.index,
+    required this.count,
     required this.progress,
+    required this.flow,
   });
   final WorkExperience experience;
-  final bool last;
+  final int index;
+  final int count;
   final double progress;
+  final Animation<double> flow;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: last ? 0 : 22),
-      child: Stack(
-        children: [
-          if (!last)
-            Positioned(
-              left: 12.25,
-              top: 29,
-              bottom: 5,
-              width: 1.5,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: FractionallySizedBox(
-                  heightFactor: progress,
-                  widthFactor: 1,
-                  child: ColoredBox(color: Colors.white.withValues(alpha: .13)),
-                ),
-              ),
-            ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 26,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Transform.scale(
-                    scale: .78 + (.22 * progress),
-                    child: Opacity(
-                      opacity: progress,
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primary,
-                          border: Border.all(
-                            color: const Color(0xFF294C55),
-                            width: 4,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(
-                                alpha: .28 * progress,
-                              ),
-                              blurRadius: 14,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Opacity(
-                  opacity: progress,
-                  child: Transform.translate(
-                    offset: Offset(0, 14 * (1 - progress)),
-                    child: GlassCard(
+    final accent = switch (index % 4) {
+      0 => AppColors.primary,
+      1 => AppColors.blue,
+      2 => AppColors.purple,
+      _ => AppColors.coral,
+    };
+    return TimelineEntry(
+      index: index,
+      count: count,
+      progress: progress,
+      flow: flow,
+      spacing: 22,
+      label: experience.period,
+      accent: accent,
+      badge: experience.current ? 'ACTIVE' : null,
+      child: Opacity(
+        opacity: progress,
+        child: Transform.translate(
+          offset: Offset(0, 14 * (1 - progress)),
+          child: TimelineCard(
+            accent: accent,
+            highlighted: experience.current,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          RevealText(
-                            text: experience.role,
-                            progress: progress,
-                            style: Theme.of(context).textTheme.titleLarge!,
+                          Text(
+                            experience.role,
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
                           const SizedBox(height: 5),
-                          RevealText(
-                            text:
-                                '${experience.company} · ${experience.period}',
-                            progress: progress,
-                            style: const TextStyle(
+                          Text(
+                            '${experience.company} · ${experience.period}',
+                            style: TextStyle(
+                              color: accent,
                               fontSize: 14,
-                              color: AppColors.primary,
-                              height: 1.5,
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
-                          const SizedBox(height: 14),
-                          Text(
-                            experience.description,
-                            style: Theme.of(context).textTheme.bodyLarge,
-                          ),
-                          const SizedBox(height: 18),
-                          TagList(experience.technologies, compact: true),
                         ],
                       ),
                     ),
-                  ),
+                    const SizedBox(width: 12),
+                    Icon(
+                      Icons.work_outline_rounded,
+                      color: accent.withValues(alpha: .8),
+                      size: 21,
+                    ),
+                  ],
                 ),
-              ),
-            ],
+                const SizedBox(height: 15),
+                Text(
+                  experience.description,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 18),
+                TimelineTags(experience.technologies),
+              ],
+            ),
           ),
-        ],
+        ),
       ),
     );
   }

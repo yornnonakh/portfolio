@@ -20,7 +20,20 @@ class ProjectIcon extends StatelessWidget {
       gradient: artwork == ProjectArtwork.notes
           ? AppGradients.mint
           : AppGradients.violet,
-      borderRadius: BorderRadius.circular(size * .3),
+      borderRadius: BorderRadius.circular(size * .225),
+      border: Border.all(color: Colors.white.withValues(alpha: .18)),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: .22),
+          blurRadius: size * .18,
+          offset: Offset(0, size * .08),
+        ),
+        BoxShadow(
+          color: Colors.white.withValues(alpha: .09),
+          blurRadius: 1,
+          offset: const Offset(0, 1),
+        ),
+      ],
     ),
     child: Icon(
       artwork == ProjectArtwork.notes

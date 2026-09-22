@@ -19,7 +19,7 @@ class ContactScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider);
     final introduction = GlassCard(
-      padding: const EdgeInsets.all(24),
+      padding: const EdgeInsets.all(26),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
@@ -27,7 +27,7 @@ class ContactScreen extends ConsumerWidget {
             "Let’s build\nsomething great.",
             style: Theme.of(
               context,
-            ).textTheme.headlineMedium?.copyWith(fontSize: 30),
+            ).textTheme.headlineMedium?.copyWith(fontSize: 32, height: 1.15),
           ),
           const SizedBox(height: 14),
           Text(
@@ -37,7 +37,7 @@ class ContactScreen extends ConsumerWidget {
           const SizedBox(height: 22),
           GradientButton(
             label: 'Send a Message',
-            icon: Icons.near_me_outlined,
+            icon: Icons.arrow_upward_rounded,
             onPressed: () => openPortfolioLink(
               context,
               ref,

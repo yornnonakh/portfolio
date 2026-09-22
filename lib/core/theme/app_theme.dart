@@ -17,20 +17,20 @@ abstract final class AppTheme {
     ),
     textTheme: const TextTheme(
       headlineLarge: TextStyle(
-        fontSize: 36,
-        fontWeight: FontWeight.w600,
-        letterSpacing: -1.2,
-        height: 1.2,
+        fontSize: 40,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -1.5,
+        height: 1.08,
       ),
       headlineMedium: TextStyle(
-        fontSize: 28,
-        fontWeight: FontWeight.w600,
-        letterSpacing: -.6,
+        fontSize: 30,
+        fontWeight: FontWeight.w700,
+        letterSpacing: -.8,
         height: 1.25,
       ),
       titleLarge: TextStyle(
         fontSize: 20,
-        fontWeight: FontWeight.w600,
+        fontWeight: FontWeight.w700,
         height: 1.3,
       ),
       titleMedium: TextStyle(
@@ -40,7 +40,7 @@ abstract final class AppTheme {
       ),
       bodyLarge: TextStyle(
         fontSize: 16,
-        height: 1.6,
+        height: 1.5,
         color: AppColors.textSecondary,
       ),
       bodyMedium: TextStyle(
@@ -70,6 +70,7 @@ abstract final class AppTheme {
     iconButtonTheme: IconButtonThemeData(
       style: IconButton.styleFrom(foregroundColor: AppColors.textSecondary),
     ),
+    splashFactory: NoSplash.splashFactory,
     dividerTheme: const DividerThemeData(
       color: Color(0x18FFFFFF),
       thickness: 1,

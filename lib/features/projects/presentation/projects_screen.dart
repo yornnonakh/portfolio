@@ -1,11 +1,11 @@
 import 'dart:math' as math;
 
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/glass_card.dart';
-import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/page_content.dart';
+import '../../../core/widgets/timeline_entry.dart';
 import '../../../data/models/portfolio.dart';
 import 'project_detail_sheet.dart';
 import 'projects_provider.dart';
@@ -21,51 +21,17 @@ class ProjectsScreen extends ConsumerWidget {
     return PageContent(
       title: 'Projects',
       children: [
-        Wrap(
-          spacing: 9,
-          runSpacing: 10,
-          children: [
-            for (final category in ProjectCategory.values)
-              _CategoryButton(
-                category: category,
-                selected: selected == category,
-                onPressed: () =>
-                    ref.read(projectFilterProvider.notifier).select(category),
-              ),
-          ],
+        _CategorySelector(
+          selected: selected,
+          onSelected: (category) =>
+              ref.read(projectFilterProvider.notifier).select(category),
         ),
         const SizedBox(height: 22),
         if (projects.isEmpty)
-          GlassCard(
-            child: Column(
-              children: [
-                const SizedBox(height: 18),
-                const Icon(
-                  Icons.code_rounded,
-                  color: AppColors.primary,
-                  size: 36,
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  'More good things are on the way.',
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleLarge,
-                ),
-                const SizedBox(height: 10),
-                const Text(
-                  'No projects in this collection just yet. Take a look at my other work in the meantime.',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                GradientButton(
-                  label: 'Show all projects',
-                  onPressed: () => ref
-                      .read(projectFilterProvider.notifier)
-                      .select(ProjectCategory.all),
-                ),
-                const SizedBox(height: 12),
-              ],
-            ),
+          _IosEmptyState(
+            onShowAll: () => ref
+                .read(projectFilterProvider.notifier)
+                .select(ProjectCategory.all),
           )
         else
           _AnimatedProjectTimeline(
@@ -94,6 +60,7 @@ class _AnimatedProjectTimeline extends StatefulWidget {
 class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
+  late final Animation<double> _flow;
   bool _reducedMotion = false;
 
   @override
@@ -103,6 +70,7 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
       vsync: this,
       duration: const Duration(milliseconds: 950),
     );
+    _flow = ReverseAnimation(_controller);
   }
 
   @override
@@ -149,8 +117,10 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
             for (var index = 0; index < widget.projects.length; index++)
               _ProjectTimelineEntry(
                 project: widget.projects[index],
-                last: index == widget.projects.length - 1,
+                index: index,
+                count: widget.projects.length,
                 progress: _projectProgress(index, stagger),
+                flow: _flow,
                 direction: index.isEven ? 1 : -1,
                 onTap: () => widget.onProjectTap(widget.projects[index]),
               ),
@@ -175,94 +145,255 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
 class _ProjectTimelineEntry extends StatelessWidget {
   const _ProjectTimelineEntry({
     required this.project,
-    required this.last,
+    required this.index,
+    required this.count,
     required this.progress,
+    required this.flow,
     required this.direction,
     required this.onTap,
   });
 
   final PortfolioProject project;
-  final bool last;
+  final int index;
+  final int count;
   final double progress;
+  final Animation<double> flow;
   final int direction;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: EdgeInsets.only(bottom: last ? 0 : 16),
-      child: Stack(
-        children: [
-          if (!last)
-            Positioned(
-              left: 12.25,
-              top: 29,
-              bottom: 5,
-              width: 1.5,
-              child: Align(
-                alignment: Alignment.topCenter,
-                child: FractionallySizedBox(
-                  heightFactor: progress,
-                  widthFactor: 1,
-                  child: ColoredBox(color: Colors.white.withValues(alpha: .13)),
-                ),
-              ),
-            ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                width: 26,
-                child: Padding(
-                  padding: const EdgeInsets.only(top: 6),
-                  child: Transform.scale(
-                    scale: .78 + (.22 * progress),
-                    child: Opacity(
-                      opacity: progress,
-                      child: Container(
-                        width: 18,
-                        height: 18,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: AppColors.primary,
-                          border: Border.all(
-                            color: const Color(0xFF294C55),
-                            width: 4,
-                          ),
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withValues(
-                                alpha: .28 * progress,
-                              ),
-                              blurRadius: 14,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-              const SizedBox(width: 10),
-              Expanded(
-                child: Opacity(
-                  opacity: progress,
-                  child: Transform.translate(
-                    offset: Offset(0, direction * 16 * (1 - progress)),
-                    child: ProjectCard(
-                      project: project,
-                      onTap: onTap,
-                      revealProgress: progress,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+    final accent = project.artwork == ProjectArtwork.notes
+        ? AppColors.primary
+        : AppColors.purple;
+    return TimelineEntry(
+      index: index,
+      count: count,
+      progress: progress,
+      flow: flow,
+      spacing: 18,
+      label: '${project.category.label} · ${project.status}',
+      accent: accent,
+      child: Opacity(
+        opacity: progress,
+        child: Transform.translate(
+          offset: Offset(0, direction * 16 * (1 - progress)),
+          child: _IosProjectCard(
+            project: project,
+            accent: accent,
+            onTap: onTap,
           ),
-        ],
+        ),
       ),
     );
   }
+}
+
+class _IosProjectCard extends StatelessWidget {
+  const _IosProjectCard({
+    required this.project,
+    required this.accent,
+    required this.onTap,
+  });
+
+  final PortfolioProject project;
+  final Color accent;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final statusColor = project.status.toLowerCase().contains('development')
+        ? AppColors.coral
+        : AppColors.primary;
+    final radius = BorderRadius.circular(22);
+    return Semantics(
+      button: true,
+      label: 'Open ${project.name} details',
+      child: Material(
+        color: const Color(0xFF141925),
+        borderRadius: radius,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: radius,
+          splashColor: const Color(0xFF0A84FF).withValues(alpha: .12),
+          hoverColor: Colors.white.withValues(alpha: .035),
+          child: Ink(
+            decoration: BoxDecoration(
+              borderRadius: radius,
+              border: Border.all(color: Colors.white.withValues(alpha: .09)),
+              gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+                colors: [
+                  Colors.white.withValues(alpha: .035),
+                  accent.withValues(alpha: .025),
+                ],
+              ),
+            ),
+            padding: const EdgeInsets.all(18),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    ProjectIcon(artwork: project.artwork, size: 64),
+                    const SizedBox(width: 14),
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            project.name,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.titleLarge,
+                          ),
+                          const SizedBox(height: 3),
+                          Text(
+                            project.summary,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  height: 1.3,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 13,
+                        vertical: 7,
+                      ),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF0A84FF).withValues(alpha: .16),
+                        borderRadius: BorderRadius.circular(999),
+                      ),
+                      child: const Text(
+                        'OPEN',
+                        style: TextStyle(
+                          color: Color(0xFF409CFF),
+                          fontSize: 12,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: .3,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 17),
+                Container(
+                  height: 1,
+                  color: Colors.white.withValues(alpha: .07),
+                ),
+                const SizedBox(height: 14),
+                Row(
+                  children: [
+                    Container(
+                      width: 7,
+                      height: 7,
+                      decoration: BoxDecoration(
+                        color: statusColor,
+                        shape: BoxShape.circle,
+                        boxShadow: [
+                          BoxShadow(
+                            color: statusColor.withValues(alpha: .35),
+                            blurRadius: 8,
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        project.status,
+                        style: TextStyle(
+                          color: statusColor,
+                          fontSize: 12,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                    ),
+                    const Icon(
+                      CupertinoIcons.chevron_forward,
+                      color: AppColors.textMuted,
+                      size: 16,
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 13),
+                Wrap(
+                  spacing: 7,
+                  runSpacing: 7,
+                  children: [
+                    for (final technology in project.technologies)
+                      _IosMetadataChip(label: technology),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _IosMetadataChip extends StatelessWidget {
+  const _IosMetadataChip({required this.label});
+
+  final String label;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+    decoration: BoxDecoration(
+      color: Colors.white.withValues(alpha: .055),
+      borderRadius: BorderRadius.circular(8),
+    ),
+    child: Text(
+      label,
+      style: const TextStyle(
+        color: AppColors.textSecondary,
+        fontSize: 11,
+        fontWeight: FontWeight.w500,
+      ),
+    ),
+  );
+}
+
+class _CategorySelector extends StatelessWidget {
+  const _CategorySelector({required this.selected, required this.onSelected});
+
+  final ProjectCategory selected;
+  final ValueChanged<ProjectCategory> onSelected;
+
+  @override
+  Widget build(BuildContext context) => SingleChildScrollView(
+    scrollDirection: Axis.horizontal,
+    child: Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: const Color(0xFF111521),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: Colors.white.withValues(alpha: .08)),
+      ),
+      child: Row(
+        children: [
+          for (final category in ProjectCategory.values)
+            _CategoryButton(
+              category: category,
+              selected: selected == category,
+              onPressed: () => onSelected(category),
+            ),
+        ],
+      ),
+    ),
+  );
 }
 
 class _CategoryButton extends StatelessWidget {
@@ -271,6 +402,7 @@ class _CategoryButton extends StatelessWidget {
     required this.selected,
     required this.onPressed,
   });
+
   final ProjectCategory category;
   final bool selected;
   final VoidCallback onPressed;
@@ -278,25 +410,90 @@ class _CategoryButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Semantics(
     selected: selected,
-    child: DecoratedBox(
+    button: true,
+    child: AnimatedContainer(
+      duration: const Duration(milliseconds: 180),
+      curve: Curves.easeOut,
       decoration: BoxDecoration(
-        gradient: selected ? AppGradients.primary : null,
-        color: selected ? null : Colors.white.withValues(alpha: .06),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(
-          color: selected ? Colors.transparent : AppColors.glassBorder,
-        ),
+        color: selected ? const Color(0xFF343947) : Colors.transparent,
+        borderRadius: BorderRadius.circular(10),
+        boxShadow: selected
+            ? const [
+                BoxShadow(
+                  color: Color(0x50000000),
+                  blurRadius: 5,
+                  offset: Offset(0, 2),
+                ),
+              ]
+            : null,
       ),
       child: TextButton(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          foregroundColor: selected ? AppColors.ink : AppColors.textPrimary,
-          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
-          minimumSize: const Size(48, 44),
+          foregroundColor: selected
+              ? AppColors.textPrimary
+              : AppColors.textSecondary,
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+          minimumSize: const Size(48, 38),
           tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: 'Outfit',
+            fontSize: 13,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         child: Text(category.label),
       ),
+    ),
+  );
+}
+
+class _IosEmptyState extends StatelessWidget {
+  const _IosEmptyState({required this.onShowAll});
+
+  final VoidCallback onShowAll;
+
+  @override
+  Widget build(BuildContext context) => Container(
+    padding: const EdgeInsets.fromLTRB(24, 34, 24, 28),
+    decoration: BoxDecoration(
+      color: const Color(0xFF141925),
+      borderRadius: BorderRadius.circular(22),
+      border: Border.all(color: Colors.white.withValues(alpha: .09)),
+    ),
+    child: Column(
+      children: [
+        const Icon(
+          CupertinoIcons.app_badge,
+          color: Color(0xFF409CFF),
+          size: 42,
+        ),
+        const SizedBox(height: 18),
+        Text(
+          'More good things are on the way.',
+          textAlign: TextAlign.center,
+          style: Theme.of(context).textTheme.titleLarge,
+        ),
+        const SizedBox(height: 8),
+        const Text(
+          'No projects in this collection just yet. Take a look at my other work in the meantime.',
+          textAlign: TextAlign.center,
+        ),
+        const SizedBox(height: 22),
+        CupertinoButton(
+          onPressed: onShowAll,
+          color: const Color(0xFF0A84FF),
+          borderRadius: BorderRadius.circular(14),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+          child: const Text(
+            'Show all projects',
+            style: TextStyle(fontWeight: FontWeight.w600),
+          ),
+        ),
+      ],
     ),
   );
 }

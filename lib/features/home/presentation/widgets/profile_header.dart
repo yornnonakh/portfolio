@@ -23,19 +23,19 @@ class ProfileHeader extends StatelessWidget {
     final wide = MediaQuery.sizeOf(context).width >= 900;
     return Column(
       children: [
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         ProfileAvatar(
           initials: profile.initials,
           imageAsset: profile.avatarAsset,
-          size: wide ? 130 : 112,
+          size: wide ? 120 : 104,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 22),
         Text(
           profile.name,
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
-          ).textTheme.headlineLarge?.copyWith(fontSize: wide ? 46 : 34),
+          ).textTheme.headlineLarge?.copyWith(fontSize: wide ? 44 : 36),
         ),
         const SizedBox(height: 6),
         TypewriterText(
@@ -43,19 +43,19 @@ class ProfileHeader extends StatelessWidget {
           enabled: animateRole,
           style: const TextStyle(
             color: AppColors.primary,
-            fontSize: 19,
-            fontWeight: FontWeight.w500,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         Text(
           profile.tagline,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 24),
         GlassCard(
-          padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: IntrinsicHeight(
             child: Row(
               children: [
@@ -68,8 +68,8 @@ class ProfileHeader extends StatelessWidget {
                         Text(
                           profile.stats[index].value,
                           style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 23,
+                            fontWeight: FontWeight.w700,
                             height: 1.2,
                           ),
                         ),
@@ -148,22 +148,19 @@ class ProfileAvatar extends StatelessWidget {
         child: Stack(
           children: [
             Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: SweepGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.coral,
-                    AppColors.purple,
-                    AppColors.blue,
-                    AppColors.primary,
-                  ],
-                  transform: GradientRotation(-1.57),
-                ),
+                color: AppColors.primary,
+                boxShadow: [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: .22),
+                    blurRadius: 24,
+                  ),
+                ],
               ),
               child: Container(
-                padding: const EdgeInsets.all(4),
+                padding: const EdgeInsets.all(3),
                 decoration: const BoxDecoration(
                   shape: BoxShape.circle,
                   color: AppColors.surface,
@@ -175,7 +172,7 @@ class ProfileAvatar extends StatelessWidget {
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
                       gradient: const LinearGradient(
-                        colors: [Color(0xFF242841), Color(0xFF161A2C)],
+                        colors: [Color(0xFF2C2C2E), Color(0xFF1C1C1E)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),

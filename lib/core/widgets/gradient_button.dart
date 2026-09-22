@@ -20,28 +20,29 @@ class GradientButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: outlined ? null : AppGradients.primary,
-        color: outlined ? Colors.white.withValues(alpha: .04) : null,
-        borderRadius: BorderRadius.circular(20),
+        color: outlined
+            ? Colors.white.withValues(alpha: .06)
+            : AppColors.primary,
+        borderRadius: BorderRadius.circular(16),
         border: outlined ? Border.all(color: AppColors.glassBorder) : null,
         boxShadow: outlined
             ? null
             : [
                 BoxShadow(
-                  color: AppColors.blue.withValues(alpha: .16),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
+                  color: AppColors.primary.withValues(alpha: .22),
+                  blurRadius: 18,
+                  offset: const Offset(0, 8),
                 ),
               ],
       ),
       child: TextButton(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          foregroundColor: outlined ? AppColors.textPrimary : AppColors.ink,
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 17),
-          minimumSize: const Size(48, 54),
+          foregroundColor: Colors.white,
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
+          minimumSize: const Size(48, 52),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
+            borderRadius: BorderRadius.circular(16),
           ),
           textStyle: const TextStyle(
             fontFamily: 'Outfit',

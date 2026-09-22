@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
@@ -12,9 +13,9 @@ class CustomBottomBar extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final compact = MediaQuery.sizeOf(context).width <= 380;
     return GlassCard(
-      borderRadius: compact ? 24 : 28,
-      blur: 22,
-      padding: EdgeInsets.all(compact ? 5 : 7),
+      borderRadius: 30,
+      blur: 32,
+      padding: const EdgeInsets.all(5),
       child: Row(
         children: [
           for (final tab in MainTab.values)
@@ -43,9 +44,7 @@ class NavigationItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(navigationProvider) == tab;
     final icon = _iconFor(tab, selected: selected, compact: compact);
-    final foreground = selected
-        ? AppColors.ink
-        : AppColors.textSecondary.withValues(alpha: .82);
+    final foreground = selected ? Colors.white : AppColors.textMuted;
     final label = tab.label;
     final radius = BorderRadius.circular(
       horizontal
@@ -65,7 +64,7 @@ class NavigationItem extends ConsumerWidget {
             : const Duration(milliseconds: 180),
         curve: Curves.easeOut,
         decoration: BoxDecoration(
-          gradient: selected ? AppGradients.primary : null,
+          color: selected ? AppColors.primary : Colors.transparent,
           borderRadius: radius,
         ),
         child: Material(
@@ -74,8 +73,8 @@ class NavigationItem extends ConsumerWidget {
             key: ValueKey('nav-${tab.name}'),
             onTap: () => ref.read(navigationProvider.notifier).select(tab),
             borderRadius: radius,
-            splashColor: AppColors.primary.withValues(alpha: .16),
-            highlightColor: Colors.white.withValues(alpha: .05),
+            splashColor: Colors.transparent,
+            highlightColor: Colors.transparent,
             child: Padding(
               padding: EdgeInsets.symmetric(
                 horizontal: horizontal
@@ -129,25 +128,29 @@ class NavigationItem extends ConsumerWidget {
     if (compact) {
       return switch (tab) {
         MainTab.home =>
-          selected ? Icons.person_rounded : Icons.person_outline_rounded,
+          selected ? CupertinoIcons.house_fill : CupertinoIcons.house,
         MainTab.project =>
-          selected ? Icons.group_rounded : Icons.group_outlined,
+          selected
+              ? CupertinoIcons.square_grid_2x2_fill
+              : CupertinoIcons.square_grid_2x2,
         MainTab.skill =>
-          selected ? Icons.grid_view_rounded : Icons.grid_view_outlined,
+          selected ? CupertinoIcons.sparkles : CupertinoIcons.wand_stars,
         MainTab.contact =>
-          selected ? Icons.mail_rounded : Icons.mail_outline_rounded,
+          selected
+              ? CupertinoIcons.chat_bubble_fill
+              : CupertinoIcons.chat_bubble,
       };
     }
     return switch (tab) {
-      MainTab.home => selected ? Icons.home_rounded : Icons.home_outlined,
+      MainTab.home =>
+        selected ? CupertinoIcons.house_fill : CupertinoIcons.house,
       MainTab.project =>
-        selected ? Icons.grid_view_rounded : Icons.grid_view_outlined,
-      MainTab.skill =>
-        selected ? Icons.auto_awesome_rounded : Icons.auto_awesome_outlined,
-      MainTab.contact =>
         selected
-            ? Icons.chat_bubble_rounded
-            : Icons.chat_bubble_outline_rounded,
+            ? CupertinoIcons.square_grid_2x2_fill
+            : CupertinoIcons.square_grid_2x2,
+      MainTab.skill => CupertinoIcons.sparkles,
+      MainTab.contact =>
+        selected ? CupertinoIcons.chat_bubble_fill : CupertinoIcons.chat_bubble,
     };
   }
 }
