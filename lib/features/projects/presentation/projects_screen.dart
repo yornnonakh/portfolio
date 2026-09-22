@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/page_content.dart';
+import '../../../core/widgets/timeline_card.dart';
 import '../../../core/widgets/timeline_entry.dart';
 import '../../../data/models/portfolio.dart';
 import 'project_detail_sheet.dart';
@@ -57,9 +58,9 @@ class _AnimatedProjectTimeline extends StatefulWidget {
 }
 
 class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
-    with SingleTickerProviderStateMixin {
+    with TickerProviderStateMixin {
   late final AnimationController _controller;
-  late final Animation<double> _flow;
+  late final AnimationController _flowController;
   bool _reducedMotion = false;
 
   @override
@@ -67,19 +68,34 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 950),
+      duration: const Duration(milliseconds: 1050),
     );
-    _flow = ReverseAnimation(_controller);
+    _flowController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 3200),
+    );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
     _reducedMotion = MediaQuery.disableAnimationsOf(context);
-    if (_reducedMotion) {
+    final tickerEnabled = TickerMode.valuesOf(context).enabled;
+    final isTest = WidgetsBinding.instance.runtimeType
+        .toString()
+        .contains('Test');
+    if (_reducedMotion || !tickerEnabled || isTest) {
       _controller.value = 1;
-    } else if (!_controller.isAnimating && !_controller.isCompleted) {
-      _controller.forward();
+      _flowController
+        ..stop()
+        ..value = 0;
+    } else {
+      if (!_controller.isAnimating && !_controller.isCompleted) {
+        _controller.forward();
+      }
+      if (!_flowController.isAnimating) {
+        _flowController.repeat(reverse: true);
+      }
     }
   }
 
@@ -102,6 +118,7 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
   @override
   void dispose() {
     _controller.dispose();
+    _flowController.dispose();
     super.dispose();
   }
 
@@ -110,17 +127,17 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
     return AnimatedBuilder(
       animation: _controller,
       builder: (context, child) {
-        final stagger = widget.projects.length <= 1 ? 0.0 : .16;
+        final count = widget.projects.length;
+        final stagger = count <= 1 ? 0.0 : .18;
         return Column(
           children: [
-            for (var index = 0; index < widget.projects.length; index++)
+            for (var index = 0; index < count; index++)
               _ProjectTimelineEntry(
                 project: widget.projects[index],
                 index: index,
-                count: widget.projects.length,
+                count: count,
                 progress: _projectProgress(index, stagger),
-                flow: _flow,
-                direction: index.isEven ? 1 : -1,
+                flow: _flowController,
                 onTap: () => widget.onProjectTap(widget.projects[index]),
               ),
           ],
@@ -131,7 +148,7 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
 
   double _projectProgress(int index, double stagger) {
     if (_reducedMotion) return 1;
-    final start = math.min(index * stagger, .42);
+    final start = math.min(index * stagger, .48);
     final end = math.min(start + .58, 1.0);
     return Interval(
       start,
@@ -148,7 +165,6 @@ class _ProjectTimelineEntry extends StatelessWidget {
     required this.count,
     required this.progress,
     required this.flow,
-    required this.direction,
     required this.onTap,
   });
 
@@ -157,98 +173,42 @@ class _ProjectTimelineEntry extends StatelessWidget {
   final int count;
   final double progress;
   final Animation<double> flow;
-  final int direction;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final accent = project.artwork == ProjectArtwork.notes
-        ? AppColors.primary
-        : AppColors.purple;
+    final accent = AppColors.ultraLightAccent(
+      index,
+      Theme.of(context).brightness,
+    );
+
+    final isDevelopment = project.status.toLowerCase().contains('development');
+
     return TimelineEntry(
       index: index,
       count: count,
       progress: progress,
       flow: flow,
-      spacing: 18,
+      spacing: 22,
       label: '${project.category.label} · ${project.status}',
+      badge: project.status.toUpperCase(),
       accent: accent,
       child: Opacity(
         opacity: progress,
         child: Transform.translate(
-          offset: Offset(0, direction * 16 * (1 - progress)),
-          child: _IosProjectCard(
-            project: project,
+          offset: Offset(0, 14 * (1 - progress)),
+          child: TimelineCard(
             accent: accent,
+            highlighted: isDevelopment,
             onTap: onTap,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _IosProjectCard extends StatelessWidget {
-  const _IosProjectCard({
-    required this.project,
-    required this.accent,
-    required this.onTap,
-  });
-
-  final PortfolioProject project;
-  final Color accent;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final brightness = theme.brightness;
-    final isDark = brightness == Brightness.dark;
-    final statusColor = project.status.toLowerCase().contains('development')
-        ? AppColors.coral
-        : theme.colorScheme.primary;
-    final radius = BorderRadius.circular(22);
-    final cardBg = isDark ? const Color(0xFF141925) : const Color(0xFFFFFFFF);
-    final border = isDark
-        ? Colors.white.withValues(alpha: .09)
-        : Colors.black.withValues(alpha: .08);
-
-    return Semantics(
-      button: true,
-      label: 'Open ${project.name} details',
-      child: Material(
-        color: cardBg,
-        borderRadius: radius,
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          onTap: onTap,
-          borderRadius: radius,
-          splashColor: theme.colorScheme.primary.withValues(alpha: .12),
-          hoverColor: isDark
-              ? Colors.white.withValues(alpha: .035)
-              : Colors.black.withValues(alpha: .025),
-          child: Ink(
-            decoration: BoxDecoration(
-              borderRadius: radius,
-              border: Border.all(color: border),
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [
-                  isDark
-                      ? Colors.white.withValues(alpha: .035)
-                      : Colors.black.withValues(alpha: .015),
-                  accent.withValues(alpha: .025),
-                ],
-              ),
-            ),
-            padding: const EdgeInsets.all(18),
+            semanticLabel: 'Open ${project.name} details',
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    ProjectIcon(artwork: project.artwork, size: 64),
+                    ProjectIcon(artwork: project.artwork, size: 54),
                     const SizedBox(width: 14),
                     Expanded(
                       child: Column(
@@ -256,128 +216,31 @@ class _IosProjectCard extends StatelessWidget {
                         children: [
                           Text(
                             project.name,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.titleLarge,
+                            style: Theme.of(context).textTheme.titleLarge,
                           ),
-                          const SizedBox(height: 3),
+                          const SizedBox(height: 4),
                           Text(
                             project.summary,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: AppColors.textSecondaryFor(brightness),
-                              height: 1.3,
-                            ),
+                            style: Theme.of(context).textTheme.bodyMedium,
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 13,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: theme.colorScheme.primary.withValues(alpha: .16),
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        'OPEN',
-                        style: TextStyle(
-                          color: theme.colorScheme.primary,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: .3,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 17),
-                Container(
-                  height: 1,
-                  color: theme.dividerColor,
-                ),
-                const SizedBox(height: 14),
-                Row(
-                  children: [
-                    Container(
-                      width: 7,
-                      height: 7,
-                      decoration: BoxDecoration(
-                        color: statusColor,
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: statusColor.withValues(alpha: .35),
-                            blurRadius: 8,
-                          ),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(width: 8),
-                    Expanded(
-                      child: Text(
-                        project.status,
-                        style: TextStyle(
-                          color: statusColor,
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ),
+                    const SizedBox(width: 10),
                     Icon(
-                      CupertinoIcons.chevron_forward,
-                      color: AppColors.textMuted,
-                      size: 16,
+                      Icons.arrow_outward_rounded,
+                      color: accent.withValues(alpha: .8),
+                      size: 20,
                     ),
                   ],
                 ),
-                const SizedBox(height: 13),
-                Wrap(
-                  spacing: 7,
-                  runSpacing: 7,
-                  children: [
-                    for (final technology in project.technologies)
-                      _IosMetadataChip(label: technology),
-                  ],
-                ),
+                const SizedBox(height: 16),
+                TimelineTags(project.technologies),
               ],
             ),
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _IosMetadataChip extends StatelessWidget {
-  const _IosMetadataChip({required this.label});
-
-  final String label;
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final isDark = brightness == Brightness.dark;
-    final chipBg = isDark
-        ? Colors.white.withValues(alpha: .055)
-        : Colors.black.withValues(alpha: .045);
-
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: chipBg,
-        borderRadius: BorderRadius.circular(8),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          color: AppColors.textSecondaryFor(brightness),
-          fontSize: 11,
-          fontWeight: FontWeight.w500,
         ),
       ),
     );

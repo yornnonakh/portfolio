@@ -58,9 +58,18 @@ class MainScaffold extends ConsumerWidget {
                       enabled: tab == MainTab.home,
                       child: HomeScreen(motionEnabled: enableHomeMotion),
                     ),
-                    const ProjectsScreen(),
-                    const SkillsScreen(),
-                    const ContactScreen(),
+                    TickerMode(
+                      enabled: tab == MainTab.project,
+                      child: const ProjectsScreen(),
+                    ),
+                    TickerMode(
+                      enabled: tab == MainTab.skill,
+                      child: const SkillsScreen(),
+                    ),
+                    TickerMode(
+                      enabled: tab == MainTab.contact,
+                      child: const ContactScreen(),
+                    ),
                   ],
                 ),
               ),
@@ -79,10 +88,7 @@ class _DesktopHeader extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider);
     final theme = Theme.of(context);
-    return Container(
-      decoration: BoxDecoration(
-        border: Border(bottom: BorderSide(color: theme.dividerColor)),
-      ),
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 22),
       child: Center(
         child: ConstrainedBox(

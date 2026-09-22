@@ -13,11 +13,13 @@ Future<void> showProjectDetails(
   BuildContext context,
   PortfolioProject project,
 ) {
+  final theme = Theme.of(context);
+  final brightness = theme.brightness;
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
     useSafeArea: true,
-    backgroundColor: AppColors.surface,
+    backgroundColor: AppColors.surfaceFor(brightness),
     barrierColor: Colors.black.withValues(alpha: .65),
     showDragHandle: true,
     constraints: const BoxConstraints(maxWidth: 640),
@@ -34,6 +36,9 @@ class _ProjectDetails extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final primaryColor = theme.colorScheme.primary;
+
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(
         26,
@@ -57,23 +62,23 @@ class _ProjectDetails extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 20),
-          Text(project.name, style: Theme.of(context).textTheme.headlineMedium),
+          Text(project.name, style: theme.textTheme.headlineMedium),
           const SizedBox(height: 6),
           Text(
             '${project.category.label} · ${project.status}',
-            style: const TextStyle(color: AppColors.primary),
+            style: TextStyle(color: primaryColor, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 18),
           Text(
             project.description,
-            style: Theme.of(context).textTheme.bodyLarge,
+            style: theme.textTheme.bodyLarge,
           ),
           const SizedBox(height: 20),
           TagList(project.technologies, compact: true),
           const SizedBox(height: 28),
           Text(
             'Thoughtfully built',
-            style: Theme.of(context).textTheme.titleMedium,
+            style: theme.textTheme.titleMedium,
           ),
           const SizedBox(height: 14),
           for (final feature in project.features)
@@ -82,19 +87,19 @@ class _ProjectDetails extends ConsumerWidget {
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const Padding(
-                    padding: EdgeInsets.only(top: 3),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 3),
                     child: Icon(
                       Icons.check_circle_outline_rounded,
                       size: 18,
-                      color: AppColors.primary,
+                      color: primaryColor,
                     ),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Text(
                       feature,
-                      style: Theme.of(context).textTheme.bodyMedium,
+                      style: theme.textTheme.bodyMedium,
                     ),
                   ),
                 ],

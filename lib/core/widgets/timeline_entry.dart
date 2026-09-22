@@ -206,7 +206,7 @@ class _TimelineRailPainter extends CustomPainter {
       start,
       end,
       Paint()
-        ..color = themeColor.withValues(alpha: .22 * progress)
+        ..color = themeColor.withValues(alpha: .12 * progress)
         ..strokeWidth = 1.5,
     );
 
@@ -218,9 +218,9 @@ class _TimelineRailPainter extends CustomPainter {
           end: Alignment.bottomCenter,
           colors: [
             themeColor.withValues(alpha: 0),
-            themeColor.withValues(alpha: .6 * progress),
-            themeColor.withValues(alpha: .9 * progress),
-            themeColor.withValues(alpha: .8 * progress),
+            themeColor.withValues(alpha: .30 * progress),
+            themeColor.withValues(alpha: .50 * progress),
+            themeColor.withValues(alpha: .35 * progress),
             themeColor.withValues(alpha: 0),
           ],
           stops: const [0, .25, .5, .7, 1],
@@ -232,21 +232,21 @@ class _TimelineRailPainter extends CustomPainter {
       end,
       Paint()
         ..shader = shader
-        ..strokeWidth = 4
-        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 3),
+        ..strokeWidth = 3.5
+        ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 2.5),
     );
     canvas.drawLine(
       start,
       end,
       Paint()
         ..shader = shader
-        ..strokeWidth = 1.5,
+        ..strokeWidth = 1.2,
     );
     canvas.drawLine(
       const Offset(28, 18),
       Offset(size.width - 5, 18),
       Paint()
-        ..color = accent.withValues(alpha: (.2 + intensity * .3) * progress)
+        ..color = accent.withValues(alpha: (.10 + intensity * .15) * progress)
         ..strokeWidth = 1,
     );
     canvas.restore();
@@ -258,7 +258,7 @@ class _TimelineRailPainter extends CustomPainter {
     canvas.drawRRect(
       marker,
       Paint()
-        ..color = accent.withValues(alpha: .12 * intensity * progress)
+        ..color = accent.withValues(alpha: .08 * intensity * progress)
         ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 4),
     );
     canvas.drawRRect(
@@ -267,12 +267,12 @@ class _TimelineRailPainter extends CustomPainter {
     );
     canvas.drawRRect(
       marker,
-      Paint()..color = accent.withValues(alpha: .06 * progress),
+      Paint()..color = accent.withValues(alpha: .04 * progress),
     );
     canvas.drawRRect(
       marker,
       Paint()
-        ..color = accent.withValues(alpha: (.3 + .5 * intensity) * progress)
+        ..color = accent.withValues(alpha: (.20 + .30 * intensity) * progress)
         ..style = PaintingStyle.stroke
         ..strokeWidth = 1,
     );

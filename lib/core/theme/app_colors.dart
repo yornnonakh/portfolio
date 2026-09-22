@@ -42,6 +42,17 @@ abstract final class AppColors {
 
   static Color glassBorderFor(Brightness brightness) =>
       brightness == Brightness.dark ? glassBorder : glassBorderLight;
+
+  // Ultra-light accent palette for timeline & smooth highlights
+  static Color ultraLightAccent(int index, Brightness brightness) {
+    final isDark = brightness == Brightness.dark;
+    return switch (index % 4) {
+      0 => isDark ? const Color(0xFF64C8FF) : const Color(0xFF007AFF),
+      1 => isDark ? const Color(0xFF9D94FF) : const Color(0xFF5856D6),
+      2 => isDark ? const Color(0xFF5DE0E6) : const Color(0xFF00A8A8),
+      _ => isDark ? const Color(0xFFFFB366) : const Color(0xFFD97000),
+    };
+  }
 }
 
 abstract final class AppGradients {

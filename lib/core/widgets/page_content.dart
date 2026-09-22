@@ -135,6 +135,7 @@ class _PageContentState extends State<PageContent> {
                         ((currentExtent - toolbarHeight) /
                                 (expandedHeight - toolbarHeight))
                             .clamp(0.0, 1.0);
+
                     return Padding(
                       padding: EdgeInsetsDirectional.fromSTEB(
                         horizontalInset * expanded,
