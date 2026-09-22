@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/availability_badge.dart';
 import '../../../core/widgets/glass_background.dart';
+import '../../../core/widgets/theme_toggle_button.dart';
 import '../../../data/portfolio_providers.dart';
 import '../../contact/presentation/contact_screen.dart';
 
@@ -47,27 +47,24 @@ class MainScaffold extends ConsumerWidget {
                 ),
               ),
         body: GlassBackground(
-          child: SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                if (wide) const _DesktopHeader(),
-                Expanded(
-                  child: IndexedStack(
-                    index: tab.index,
-                    children: [
-                      TickerMode(
-                        enabled: tab == MainTab.home,
-                        child: HomeScreen(motionEnabled: enableHomeMotion),
-                      ),
-                      const ProjectsScreen(),
-                      const SkillsScreen(),
-                      const ContactScreen(),
-                    ],
-                  ),
+          child: Column(
+            children: [
+              if (wide) SafeArea(bottom: false, child: const _DesktopHeader()),
+              Expanded(
+                child: IndexedStack(
+                  index: tab.index,
+                  children: [
+                    TickerMode(
+                      enabled: tab == MainTab.home,
+                      child: HomeScreen(motionEnabled: enableHomeMotion),
+                    ),
+                    const ProjectsScreen(),
+                    const SkillsScreen(),
+                    const ContactScreen(),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
         ),
       ),
@@ -81,9 +78,10 @@ class _DesktopHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider);
+    final theme = Theme.of(context);
     return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0x12FFFFFF))),
+      decoration: BoxDecoration(
+        border: Border(bottom: BorderSide(color: theme.dividerColor)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 22),
       child: Center(
@@ -96,10 +94,10 @@ class _DesktopHeader extends ConsumerWidget {
                     ref.read(navigationProvider.notifier).select(MainTab.home),
                 child: Text(
                   '${profile.initials.toLowerCase()}.',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -109,6 +107,8 @@ class _DesktopHeader extends ConsumerWidget {
                 const SizedBox(width: 6),
               ],
               const Spacer(),
+              const ThemeToggleButton(),
+              const SizedBox(width: 12),
               AvailabilityBadge(compact: true, available: profile.available),
             ],
           ),

@@ -31,6 +31,11 @@ class TimelineEntry extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final primaryColor = theme.colorScheme.primary;
+    final surfaceColor = theme.colorScheme.surface;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final wide =
@@ -46,7 +51,7 @@ class TimelineEntry extends StatelessWidget {
               Text(
                 label,
                 style: TextStyle(
-                  color: AppColors.textSecondary,
+                  color: AppColors.textSecondaryFor(brightness),
                   fontSize: 12,
                   fontWeight: FontWeight.w500,
                   letterSpacing: .4,
@@ -94,7 +99,8 @@ class TimelineEntry extends StatelessWidget {
                       progress: progress,
                       flow: flow,
                       accent: accent,
-                      themeColor: AppColors.primary,
+                      themeColor: primaryColor,
+                      surfaceColor: surfaceColor,
                     ),
                   ),
                 ),
@@ -170,6 +176,7 @@ class _TimelineRailPainter extends CustomPainter {
     required this.flow,
     required this.accent,
     required this.themeColor,
+    required this.surfaceColor,
   }) : super(repaint: flow);
 
   final int index;
@@ -178,6 +185,7 @@ class _TimelineRailPainter extends CustomPainter {
   final Animation<double> flow;
   final Color accent;
   final Color themeColor;
+  final Color surfaceColor;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -202,7 +210,6 @@ class _TimelineRailPainter extends CustomPainter {
         ..strokeWidth = 1.5,
     );
 
-    // Each segment uses the same position so the light visits dots in order.
     final bandY = center.dy + (position - index) * size.height;
     final bandRadius = size.height * .28;
     final shader =
@@ -256,7 +263,7 @@ class _TimelineRailPainter extends CustomPainter {
     );
     canvas.drawRRect(
       marker,
-      Paint()..color = AppColors.surface.withValues(alpha: progress),
+      Paint()..color = surfaceColor.withValues(alpha: progress),
     );
     canvas.drawRRect(
       marker,
@@ -278,5 +285,6 @@ class _TimelineRailPainter extends CustomPainter {
       oldDelegate.progress != progress ||
       oldDelegate.accent != accent ||
       oldDelegate.themeColor != themeColor ||
+      oldDelegate.surfaceColor != surfaceColor ||
       oldDelegate.flow != flow;
 }

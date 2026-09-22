@@ -209,6 +209,29 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
+  testWidgets('theme toggle cycles through System, Light, and Dark modes', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester);
+    final toggleFinder =
+        find.byKey(const ValueKey('theme-toggle-button')).first;
+    expect(toggleFinder, findsOneWidget);
+
+    expect(find.byTooltip('Theme: System (Tap to switch)'), findsWidgets);
+
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Theme: Light (Tap to switch)'), findsWidgets);
+
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Theme: Dark (Tap to switch)'), findsWidgets);
+
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+    expect(find.byTooltip('Theme: System (Tap to switch)'), findsWidgets);
+  });
+
   for (final (size, scale) in [
     (const Size(320, 640), 1.0),
     (const Size(390, 844), 1.0),

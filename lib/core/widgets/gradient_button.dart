@@ -18,18 +18,31 @@ class GradientButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final isDark = brightness == Brightness.dark;
+    final primaryColor = theme.colorScheme.primary;
+
+    final outlinedBg = isDark
+        ? Colors.white.withValues(alpha: .06)
+        : Colors.black.withValues(alpha: .04);
+
+    final foreground = outlined
+        ? theme.colorScheme.onSurface
+        : Colors.white;
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: outlined
-            ? Colors.white.withValues(alpha: .06)
-            : AppColors.primary,
+        color: outlined ? outlinedBg : primaryColor,
         borderRadius: BorderRadius.circular(16),
-        border: outlined ? Border.all(color: AppColors.glassBorder) : null,
+        border: outlined
+            ? Border.all(color: AppColors.glassBorderFor(brightness))
+            : null,
         boxShadow: outlined
             ? null
             : [
                 BoxShadow(
-                  color: AppColors.primary.withValues(alpha: .22),
+                  color: primaryColor.withValues(alpha: .22),
                   blurRadius: 18,
                   offset: const Offset(0, 8),
                 ),
@@ -38,7 +51,7 @@ class GradientButton extends StatelessWidget {
       child: TextButton(
         onPressed: onPressed,
         style: TextButton.styleFrom(
-          foregroundColor: Colors.white,
+          foregroundColor: foreground,
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
           minimumSize: const Size(48, 52),
           shape: RoundedRectangleBorder(

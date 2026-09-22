@@ -44,7 +44,10 @@ class NavigationItem extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(navigationProvider) == tab;
     final icon = _iconFor(tab, selected: selected, compact: compact);
-    final foreground = selected ? Colors.white : AppColors.textMuted;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+    final foreground = selected
+        ? Colors.white
+        : AppColors.textSecondaryFor(Theme.of(context).brightness);
     final label = tab.label;
     final radius = BorderRadius.circular(
       horizontal
@@ -64,7 +67,7 @@ class NavigationItem extends ConsumerWidget {
             : const Duration(milliseconds: 180),
         curve: Curves.easeOut,
         decoration: BoxDecoration(
-          color: selected ? AppColors.primary : Colors.transparent,
+          color: selected ? primaryColor : Colors.transparent,
           borderRadius: radius,
         ),
         child: Material(

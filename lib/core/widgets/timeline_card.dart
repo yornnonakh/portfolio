@@ -21,12 +21,22 @@ class TimelineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(18);
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+
+    final cardBg = isDark ? const Color(0xFF121827) : const Color(0xFFFFFFFF);
+    final border = highlighted
+        ? accent.withValues(alpha: .3)
+        : (isDark
+            ? Colors.white.withValues(alpha: .09)
+            : Colors.black.withValues(alpha: .08));
+
     final content = Padding(padding: const EdgeInsets.all(20), child: child);
     return Semantics(
       button: onTap == null ? null : true,
       label: semanticLabel,
       child: Material(
-        color: const Color(0xFF121827),
+        color: cardBg,
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: Ink(
@@ -40,11 +50,7 @@ class TimelineCard extends StatelessWidget {
                 Colors.transparent,
               ],
             ),
-            border: Border.all(
-              color: highlighted
-                  ? accent.withValues(alpha: .3)
-                  : AppColors.textPrimary.withValues(alpha: .09),
-            ),
+            border: Border.all(color: border),
           ),
           child: onTap == null
               ? content
@@ -68,26 +74,35 @@ class TimelineTags extends StatelessWidget {
   final List<String> tags;
 
   @override
-  Widget build(BuildContext context) => Wrap(
-    spacing: 6,
-    runSpacing: 6,
-    children: [
-      for (final tag in tags)
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
-          decoration: BoxDecoration(
-            color: AppColors.textPrimary.withValues(alpha: .045),
-            borderRadius: BorderRadius.circular(6),
-          ),
-          child: Text(
-            tag,
-            style: TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w500,
-              color: AppColors.textSecondary,
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+
+    final tagBg = isDark
+        ? Colors.white.withValues(alpha: .045)
+        : Colors.black.withValues(alpha: .045);
+
+    return Wrap(
+      spacing: 6,
+      runSpacing: 6,
+      children: [
+        for (final tag in tags)
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
+            decoration: BoxDecoration(
+              color: tagBg,
+              borderRadius: BorderRadius.circular(6),
+            ),
+            child: Text(
+              tag,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: AppColors.textSecondaryFor(brightness),
+              ),
             ),
           ),
-        ),
-    ],
-  );
+      ],
+    );
+  }
 }

@@ -23,18 +23,23 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(borderRadius);
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+
     return ClipRRect(
       borderRadius: radius,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: AppGradients.glass,
+            gradient: AppGradients.glassFor(brightness),
             borderRadius: radius,
-            border: Border.all(color: AppColors.glassBorder),
+            border: Border.all(color: AppColors.glassBorderFor(brightness)),
             boxShadow: [
               BoxShadow(
-                color: Colors.black.withValues(alpha: .12),
+                color: isDark
+                    ? Colors.black.withValues(alpha: .12)
+                    : Colors.black.withValues(alpha: .05),
                 blurRadius: 30,
                 offset: const Offset(0, 12),
               ),
@@ -50,8 +55,12 @@ class GlassCard extends StatelessWidget {
                     child: InkWell(
                       onTap: onTap,
                       borderRadius: radius,
-                      hoverColor: Colors.white.withValues(alpha: .04),
-                      splashColor: AppColors.primary.withValues(alpha: .12),
+                      hoverColor: isDark
+                          ? Colors.white.withValues(alpha: .04)
+                          : Colors.black.withValues(alpha: .03),
+                      splashColor: isDark
+                          ? AppColors.primary.withValues(alpha: .12)
+                          : AppColors.primaryLight.withValues(alpha: .12),
                       child: Padding(padding: padding, child: child),
                     ),
                   ),

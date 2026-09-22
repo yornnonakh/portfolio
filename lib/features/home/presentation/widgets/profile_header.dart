@@ -21,6 +21,8 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 900;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Column(
       children: [
         const SizedBox(height: 8),
@@ -41,8 +43,8 @@ class ProfileHeader extends StatelessWidget {
         TypewriterText(
           text: profile.role,
           enabled: animateRole,
-          style: const TextStyle(
-            color: AppColors.primary,
+          style: TextStyle(
+            color: primaryColor,
             fontSize: 17,
             fontWeight: FontWeight.w600,
           ),
@@ -138,6 +140,9 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Semantics(
       image: true,
       label: imageAsset == null
@@ -151,19 +156,19 @@ class ProfileAvatar extends StatelessWidget {
               padding: const EdgeInsets.all(3),
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                color: AppColors.primary,
+                color: primaryColor,
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: .22),
+                    color: primaryColor.withValues(alpha: .22),
                     blurRadius: 24,
                   ),
                 ],
               ),
               child: Container(
                 padding: const EdgeInsets.all(3),
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 child: SizedBox(
                   width: size - 16,
@@ -171,12 +176,16 @@ class ProfileAvatar extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF2C2C2E), Color(0xFF1C1C1E)],
+                      gradient: LinearGradient(
+                        colors: brightness == Brightness.dark
+                            ? const [Color(0xFF2C2C2E), Color(0xFF1C1C1E)]
+                            : const [Color(0xFFFFFFFF), Color(0xFFE5E5EA)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      border: Border.all(color: AppColors.glassBorder),
+                      border: Border.all(
+                        color: AppColors.glassBorderFor(brightness),
+                      ),
                     ),
                     child: ClipOval(
                       child: imageAsset == null
@@ -217,9 +226,12 @@ class ProfileAvatar extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: primaryColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.background, width: 4),
+                  border: Border.all(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    width: 4,
+                  ),
                 ),
                 child: const Icon(
                   Icons.check_rounded,

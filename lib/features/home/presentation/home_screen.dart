@@ -376,7 +376,7 @@ class _ProfileLink extends StatelessWidget {
     borderRadius: 18,
     child: Row(
       children: [
-        Icon(icon, size: 19, color: AppColors.primary),
+        Icon(icon, size: 19, color: Theme.of(context).colorScheme.primary),
         const SizedBox(width: 9),
         Expanded(
           child: Text(

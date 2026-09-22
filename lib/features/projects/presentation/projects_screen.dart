@@ -1,5 +1,4 @@
 import 'dart:math' as math;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -202,31 +201,43 @@ class _IosProjectCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final isDark = brightness == Brightness.dark;
     final statusColor = project.status.toLowerCase().contains('development')
         ? AppColors.coral
-        : AppColors.primary;
+        : theme.colorScheme.primary;
     final radius = BorderRadius.circular(22);
+    final cardBg = isDark ? const Color(0xFF141925) : const Color(0xFFFFFFFF);
+    final border = isDark
+        ? Colors.white.withValues(alpha: .09)
+        : Colors.black.withValues(alpha: .08);
+
     return Semantics(
       button: true,
       label: 'Open ${project.name} details',
       child: Material(
-        color: const Color(0xFF141925),
+        color: cardBg,
         borderRadius: radius,
         clipBehavior: Clip.antiAlias,
         child: InkWell(
           onTap: onTap,
           borderRadius: radius,
-          splashColor: const Color(0xFF0A84FF).withValues(alpha: .12),
-          hoverColor: Colors.white.withValues(alpha: .035),
+          splashColor: theme.colorScheme.primary.withValues(alpha: .12),
+          hoverColor: isDark
+              ? Colors.white.withValues(alpha: .035)
+              : Colors.black.withValues(alpha: .025),
           child: Ink(
             decoration: BoxDecoration(
               borderRadius: radius,
-              border: Border.all(color: Colors.white.withValues(alpha: .09)),
+              border: Border.all(color: border),
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  Colors.white.withValues(alpha: .035),
+                  isDark
+                      ? Colors.white.withValues(alpha: .035)
+                      : Colors.black.withValues(alpha: .015),
                   accent.withValues(alpha: .025),
                 ],
               ),
@@ -247,18 +258,17 @@ class _IosProjectCard extends StatelessWidget {
                             project.name,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleLarge,
+                            style: theme.textTheme.titleLarge,
                           ),
                           const SizedBox(height: 3),
                           Text(
                             project.summary,
                             maxLines: 2,
                             overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  height: 1.3,
-                                ),
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: AppColors.textSecondaryFor(brightness),
+                              height: 1.3,
+                            ),
                           ),
                         ],
                       ),
@@ -270,13 +280,13 @@ class _IosProjectCard extends StatelessWidget {
                         vertical: 7,
                       ),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF0A84FF).withValues(alpha: .16),
+                        color: theme.colorScheme.primary.withValues(alpha: .16),
                         borderRadius: BorderRadius.circular(999),
                       ),
-                      child: const Text(
+                      child: Text(
                         'OPEN',
                         style: TextStyle(
-                          color: Color(0xFF409CFF),
+                          color: theme.colorScheme.primary,
                           fontSize: 12,
                           fontWeight: FontWeight.w700,
                           letterSpacing: .3,
@@ -288,7 +298,7 @@ class _IosProjectCard extends StatelessWidget {
                 const SizedBox(height: 17),
                 Container(
                   height: 1,
-                  color: Colors.white.withValues(alpha: .07),
+                  color: theme.dividerColor,
                 ),
                 const SizedBox(height: 14),
                 Row(
@@ -318,7 +328,7 @@ class _IosProjectCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    const Icon(
+                    Icon(
                       CupertinoIcons.chevron_forward,
                       color: AppColors.textMuted,
                       size: 16,
@@ -349,21 +359,29 @@ class _IosMetadataChip extends StatelessWidget {
   final String label;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-    decoration: BoxDecoration(
-      color: Colors.white.withValues(alpha: .055),
-      borderRadius: BorderRadius.circular(8),
-    ),
-    child: Text(
-      label,
-      style: const TextStyle(
-        color: AppColors.textSecondary,
-        fontSize: 11,
-        fontWeight: FontWeight.w500,
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    final chipBg = isDark
+        ? Colors.white.withValues(alpha: .055)
+        : Colors.black.withValues(alpha: .045);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: chipBg,
+        borderRadius: BorderRadius.circular(8),
       ),
-    ),
-  );
+      child: Text(
+        label,
+        style: TextStyle(
+          color: AppColors.textSecondaryFor(brightness),
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+    );
+  }
 }
 
 class _CategorySelector extends StatelessWidget {
@@ -373,27 +391,36 @@ class _CategorySelector extends StatelessWidget {
   final ValueChanged<ProjectCategory> onSelected;
 
   @override
-  Widget build(BuildContext context) => SingleChildScrollView(
-    scrollDirection: Axis.horizontal,
-    child: Container(
-      padding: const EdgeInsets.all(4),
-      decoration: BoxDecoration(
-        color: const Color(0xFF111521),
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: Colors.white.withValues(alpha: .08)),
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    final containerBg = isDark ? const Color(0xFF111521) : const Color(0xFFE5E5EA);
+    final border = isDark
+        ? Colors.white.withValues(alpha: .08)
+        : Colors.black.withValues(alpha: .06);
+
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Container(
+        padding: const EdgeInsets.all(4),
+        decoration: BoxDecoration(
+          color: containerBg,
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: border),
+        ),
+        child: Row(
+          children: [
+            for (final category in ProjectCategory.values)
+              _CategoryButton(
+                category: category,
+                selected: selected == category,
+                onPressed: () => onSelected(category),
+              ),
+          ],
+        ),
       ),
-      child: Row(
-        children: [
-          for (final category in ProjectCategory.values)
-            _CategoryButton(
-              category: category,
-              selected: selected == category,
-              onPressed: () => onSelected(category),
-            ),
-        ],
-      ),
-    ),
-  );
+    );
+  }
 }
 
 class _CategoryButton extends StatelessWidget {
@@ -408,47 +435,53 @@ class _CategoryButton extends StatelessWidget {
   final VoidCallback onPressed;
 
   @override
-  Widget build(BuildContext context) => Semantics(
-    selected: selected,
-    button: true,
-    child: AnimatedContainer(
-      duration: const Duration(milliseconds: 180),
-      curve: Curves.easeOut,
-      decoration: BoxDecoration(
-        color: selected ? const Color(0xFF343947) : Colors.transparent,
-        borderRadius: BorderRadius.circular(10),
-        boxShadow: selected
-            ? const [
-                BoxShadow(
-                  color: Color(0x50000000),
-                  blurRadius: 5,
-                  offset: Offset(0, 2),
-                ),
-              ]
-            : null,
-      ),
-      child: TextButton(
-        onPressed: onPressed,
-        style: TextButton.styleFrom(
-          foregroundColor: selected
-              ? AppColors.textPrimary
-              : AppColors.textSecondary,
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-          minimumSize: const Size(48, 38),
-          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(10),
-          ),
-          textStyle: const TextStyle(
-            fontFamily: 'Outfit',
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
-          ),
+  Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+    final selectedBg = isDark ? const Color(0xFF343947) : const Color(0xFFFFFFFF);
+
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          color: selected ? selectedBg : Colors.transparent,
+          borderRadius: BorderRadius.circular(10),
+          boxShadow: selected
+              ? [
+                  BoxShadow(
+                    color: isDark ? const Color(0x50000000) : const Color(0x18000000),
+                    blurRadius: 5,
+                    offset: const Offset(0, 2),
+                  ),
+                ]
+              : null,
         ),
-        child: Text(category.label),
+        child: TextButton(
+          onPressed: onPressed,
+          style: TextButton.styleFrom(
+            foregroundColor: selected
+                ? AppColors.textPrimaryFor(brightness)
+                : AppColors.textSecondaryFor(brightness),
+            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+            minimumSize: const Size(48, 38),
+            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            textStyle: const TextStyle(
+              fontFamily: 'Outfit',
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          child: Text(category.label),
+        ),
       ),
-    ),
-  );
+    );
+  }
 }
 
 class _IosEmptyState extends StatelessWidget {
@@ -457,43 +490,52 @@ class _IosEmptyState extends StatelessWidget {
   final VoidCallback onShowAll;
 
   @override
-  Widget build(BuildContext context) => Container(
-    padding: const EdgeInsets.fromLTRB(24, 34, 24, 28),
-    decoration: BoxDecoration(
-      color: const Color(0xFF141925),
-      borderRadius: BorderRadius.circular(22),
-      border: Border.all(color: Colors.white.withValues(alpha: .09)),
-    ),
-    child: Column(
-      children: [
-        const Icon(
-          CupertinoIcons.app_badge,
-          color: Color(0xFF409CFF),
-          size: 42,
-        ),
-        const SizedBox(height: 18),
-        Text(
-          'More good things are on the way.',
-          textAlign: TextAlign.center,
-          style: Theme.of(context).textTheme.titleLarge,
-        ),
-        const SizedBox(height: 8),
-        const Text(
-          'No projects in this collection just yet. Take a look at my other work in the meantime.',
-          textAlign: TextAlign.center,
-        ),
-        const SizedBox(height: 22),
-        CupertinoButton(
-          onPressed: onShowAll,
-          color: const Color(0xFF0A84FF),
-          borderRadius: BorderRadius.circular(14),
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          child: const Text(
-            'Show all projects',
-            style: TextStyle(fontWeight: FontWeight.w600),
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+    final containerBg = isDark ? const Color(0xFF141925) : const Color(0xFFFFFFFF);
+    final border = isDark
+        ? Colors.white.withValues(alpha: .09)
+        : Colors.black.withValues(alpha: .08);
+
+    return Container(
+      padding: const EdgeInsets.fromLTRB(24, 34, 24, 28),
+      decoration: BoxDecoration(
+        color: containerBg,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(color: border),
+      ),
+      child: Column(
+        children: [
+          Icon(
+            CupertinoIcons.app_badge,
+            color: theme.colorScheme.primary,
+            size: 42,
           ),
-        ),
-      ],
-    ),
-  );
+          const SizedBox(height: 18),
+          Text(
+            'More good things are on the way.',
+            textAlign: TextAlign.center,
+            style: theme.textTheme.titleLarge,
+          ),
+          const SizedBox(height: 8),
+          const Text(
+            'No projects in this collection just yet. Take a look at my other work in the meantime.',
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 22),
+          CupertinoButton(
+            onPressed: onShowAll,
+            color: theme.colorScheme.primary,
+            borderRadius: BorderRadius.circular(14),
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: const Text(
+              'Show all projects',
+              style: TextStyle(fontWeight: FontWeight.w600),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
 }
