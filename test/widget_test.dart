@@ -117,7 +117,12 @@ void main() {
       ('About me', 'Education'),
       ('Experience', 'Nimbus Labs · 2023 — Present'),
     ]) {
-      await tester.ensureVisible(find.text(label));
+      await Scrollable.ensureVisible(
+        tester.element(find.text(label)),
+        alignment: .5,
+        duration: Duration.zero,
+      );
+      await tester.pumpAndSettle();
       await tester.tap(find.text(label));
       if (label == 'Experience') {
         await tester.pump();
@@ -175,6 +180,34 @@ void main() {
       expect(find.text('Email address copied.'), findsOneWidget);
     },
   );
+
+  testWidgets('page titles collapse into the top app bar while scrolling', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester);
+    await selectTab(tester, MainTab.skill);
+
+    final title = find.descendant(
+      of: find.byType(SliverAppBar),
+      matching: find.text('Skills'),
+    );
+    final expandedRect = tester.getRect(title);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -360));
+    await tester.pumpAndSettle();
+
+    final collapsedRect = tester.getRect(title);
+    final viewportCenter = tester.getCenter(find.byType(CustomScrollView)).dx;
+    expect(expandedRect.left, lessThan(40));
+    expect(collapsedRect.center.dx, closeTo(viewportCenter, 1));
+    expect(collapsedRect.bottom, lessThan(expandedRect.bottom));
+    expect(collapsedRect.height, lessThan(expandedRect.height));
+    expect(
+      tester.widget<SliverAppBar>(find.byType(SliverAppBar)).backgroundColor,
+      Colors.transparent,
+    );
+    expect(tester.takeException(), isNull);
+  });
 
   for (final (size, scale) in [
     (const Size(320, 640), 1.0),

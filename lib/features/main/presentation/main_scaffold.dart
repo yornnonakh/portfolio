@@ -27,6 +27,25 @@ class MainScaffold extends ConsumerWidget {
         if (!didPop) ref.read(navigationProvider.notifier).select(MainTab.home);
       },
       child: Scaffold(
+        extendBody: true,
+        bottomNavigationBar: wide
+            ? null
+            : SafeArea(
+                minimum: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                child: SizedBox(
+                  height: 66,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: BoxConstraints(
+                        maxWidth: MediaQuery.sizeOf(context).width <= 380
+                            ? 220
+                            : 420,
+                      ),
+                      child: const CustomBottomBar(),
+                    ),
+                  ),
+                ),
+              ),
         body: GlassBackground(
           child: SafeArea(
             bottom: false,
@@ -34,48 +53,16 @@ class MainScaffold extends ConsumerWidget {
               children: [
                 if (wide) const _DesktopHeader(),
                 Expanded(
-                  child: Stack(
+                  child: IndexedStack(
+                    index: tab.index,
                     children: [
-                      Positioned.fill(
-                        child: IndexedStack(
-                          index: tab.index,
-                          children: [
-                            TickerMode(
-                              enabled: tab == MainTab.home,
-                              child: HomeScreen(
-                                motionEnabled: enableHomeMotion,
-                              ),
-                            ),
-                            const ProjectsScreen(),
-                            const SkillsScreen(),
-                            const ContactScreen(),
-                          ],
-                        ),
+                      TickerMode(
+                        enabled: tab == MainTab.home,
+                        child: HomeScreen(motionEnabled: enableHomeMotion),
                       ),
-                      if (!wide)
-                        Positioned(
-                          left: MediaQuery.sizeOf(context).width <= 380
-                              ? 32
-                              : 24,
-                          right: MediaQuery.sizeOf(context).width <= 380
-                              ? 32
-                              : 24,
-                          bottom: 12,
-                          child: SafeArea(
-                            top: false,
-                            child: Center(
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.sizeOf(context).width <= 380
-                                      ? 220
-                                      : 420,
-                                ),
-                                child: const CustomBottomBar(),
-                              ),
-                            ),
-                          ),
-                        ),
+                      const ProjectsScreen(),
+                      const SkillsScreen(),
+                      const ContactScreen(),
                     ],
                   ),
                 ),

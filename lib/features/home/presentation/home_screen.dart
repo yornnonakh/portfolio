@@ -31,19 +31,6 @@ class HomeScreen extends ConsumerWidget {
       ref.read(navigationProvider.notifier).select(MainTab.project);
     }
 
-    // The smallest reference uses a denser profile-first layout. Keeping this
-    // breakpoint separate also leaves the larger profile presentation airy.
-    if (MediaQuery.sizeOf(context).width <= 380) {
-      return HomeMotion(
-        enabled: motionEnabled,
-        child: _CompactHomeScreen(
-          profile: profile,
-          onProjects: showProjects,
-          animateRole: motionEnabled,
-        ),
-      );
-    }
-
     final introduction = ProfileHeader(
       profile: profile,
       onProjects: showProjects,
@@ -117,6 +104,8 @@ class HomeScreen extends ConsumerWidget {
   }
 }
 
+// Kept as a dense fallback layout for future embedded/landscape surfaces.
+// ignore: unused_element
 class _CompactHomeScreen extends StatelessWidget {
   const _CompactHomeScreen({
     required this.profile,

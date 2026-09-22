@@ -23,59 +23,105 @@ class PageContent extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 900;
-    return SingleChildScrollView(
+    final horizontalInset = wide ? 48.0 : 24.0;
+    const toolbarHeight = 64.0;
+    final expandedHeight = wide ? 118.0 : 110.0;
+    return CustomScrollView(
       key: PageStorageKey(title),
-      padding: EdgeInsets.fromLTRB(
-        wide ? 48 : 24,
-        wide ? 44 : 28,
-        wide ? 48 : 24,
-        wide || backLabel != null ? 40 : 132,
+      physics: const BouncingScrollPhysics(
+        parent: AlwaysScrollableScrollPhysics(),
       ),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: ConstrainedBox(
-          constraints: BoxConstraints(maxWidth: maxWidth),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              if (backLabel != null) ...[
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: TextButton.icon(
-                    onPressed: () => Navigator.of(context).pop(),
-                    icon: const Icon(
-                      Icons.arrow_back_ios_new_rounded,
-                      size: 17,
-                    ),
-                    label: Text(backLabel!),
-                    style: TextButton.styleFrom(padding: EdgeInsets.zero),
+      slivers: [
+        SliverAppBar(
+          primary: false,
+          pinned: true,
+          automaticallyImplyLeading: false,
+          centerTitle: false,
+          toolbarHeight: toolbarHeight,
+          expandedHeight: expandedHeight,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          backgroundColor: Colors.transparent,
+          surfaceTintColor: Colors.transparent,
+          leadingWidth: backLabel == null ? 0 : 104,
+          leading: backLabel == null
+              ? null
+              : TextButton.icon(
+                  onPressed: () => Navigator.of(context).pop(),
+                  icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 15),
+                  label: Text(backLabel!),
+                  style: TextButton.styleFrom(
+                    padding: const EdgeInsets.only(left: 12, right: 8),
                   ),
                 ),
-                const SizedBox(height: 8),
-              ],
-              Row(
-                children: [
-                  Expanded(
+          actions: [
+            if (trailing != null) ...[
+              trailing!,
+              SizedBox(width: wide ? 48 : 16),
+            ],
+          ],
+          flexibleSpace: LayoutBuilder(
+            builder: (context, constraints) {
+              final expanded =
+                  ((constraints.maxHeight - toolbarHeight) /
+                          (expandedHeight - toolbarHeight))
+                      .clamp(0.0, 1.0);
+              return Padding(
+                padding: EdgeInsetsDirectional.fromSTEB(
+                  horizontalInset * expanded,
+                  0,
+                  horizontalInset * expanded,
+                  16,
+                ),
+                child: Align(
+                  alignment: Alignment.lerp(
+                    Alignment.bottomCenter,
+                    Alignment.bottomLeft,
+                    expanded,
+                  )!,
+                  child: Transform.scale(
+                    scale: 1 + (.7 * expanded),
+                    alignment: Alignment.bottomLeft,
                     child: Semantics(
                       header: true,
                       child: Text(
                         title,
-                        style: Theme.of(context).textTheme.headlineLarge,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          letterSpacing: -.8,
+                        ),
                       ),
                     ),
                   ),
-                  if (trailing != null) ...[
-                    const SizedBox(width: 12),
-                    trailing!,
-                  ],
-                ],
-              ),
-              const SizedBox(height: 32),
-              ...children,
-            ],
+                ),
+              );
+            },
           ),
         ),
-      ),
+        SliverPadding(
+          padding: EdgeInsets.fromLTRB(
+            horizontalInset,
+            24,
+            horizontalInset,
+            wide || backLabel != null ? 40 : 132,
+          ),
+          sliver: SliverToBoxAdapter(
+            child: Align(
+              alignment: Alignment.topCenter,
+              child: ConstrainedBox(
+                constraints: BoxConstraints(maxWidth: maxWidth),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: children,
+                ),
+              ),
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
