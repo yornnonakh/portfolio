@@ -11,70 +11,22 @@ class ThemeToggleButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final themeMode = ref.watch(themeModeProvider);
-    final (icon, label) = switch (themeMode) {
-      ThemeMode.system => (
-        CupertinoIcons.device_phone_portrait,
-        'Theme: System',
-      ),
-      ThemeMode.light => (CupertinoIcons.sun_max_fill, 'Theme: Light'),
-      ThemeMode.dark => (CupertinoIcons.moon_stars_fill, 'Theme: Dark'),
-    };
-
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final icon = isDark
+        ? CupertinoIcons.moon_fill
+        : CupertinoIcons.sun_max_fill;
+    final nextMode = isDark ? ThemeMode.light : ThemeMode.dark;
+    final label = isDark ? 'Switch to light mode' : 'Switch to dark mode';
 
-    return Tooltip(
-      message: '$label (Tap to switch)',
-      child: Material(
-        color: Colors.transparent,
-        shape: const CircleBorder(),
-        clipBehavior: Clip.antiAlias,
-        child: InkWell(
-          key: const ValueKey('theme-toggle-button'),
-          onTap: () => ref.read(themeModeProvider.notifier).cycleTheme(),
-          child: Container(
-            padding: EdgeInsets.all(compact ? 8 : 10),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              color: isDark
-                  ? Colors.white.withValues(alpha: .08)
-                  : Colors.black.withValues(alpha: .05),
-              border: Border.all(
-                color: isDark
-                    ? Colors.white.withValues(alpha: .12)
-                    : Colors.black.withValues(alpha: .08),
-              ),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  icon,
-                  size: compact ? 17 : 19,
-                  color: isDark ? const Color(0xFF64D2FF) : const Color(0xFF007AFF),
-                ),
-                if (!compact) ...[
-                  const SizedBox(width: 6),
-                  Text(
-                    switch (themeMode) {
-                      ThemeMode.system => 'Auto',
-                      ThemeMode.light => 'Light',
-                      ThemeMode.dark => 'Dark',
-                    },
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.w600,
-                      color: isDark
-                          ? const Color(0xFFF5F5F7)
-                          : const Color(0xFF1C1C1E),
-                    ),
-                  ),
-                ],
-              ],
-            ),
-          ),
-        ),
-      ),
+    return IconButton(
+      key: const ValueKey('theme-toggle-button'),
+      onPressed: () =>
+          ref.read(themeModeProvider.notifier).setThemeMode(nextMode),
+      tooltip: label,
+      padding: EdgeInsets.zero,
+      iconSize: compact ? 19 : 21,
+      color: isDark ? const Color(0xFF64D2FF) : const Color(0xFF007AFF),
+      icon: Icon(icon),
     );
   }
 }
