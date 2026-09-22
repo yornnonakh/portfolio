@@ -130,6 +130,8 @@ class NavigationItem extends ConsumerWidget {
   }) {
     if (compact) {
       return switch (tab) {
+        MainTab.dashboard =>
+          selected ? Icons.dashboard_rounded : Icons.dashboard_outlined,
         MainTab.home =>
           selected ? CupertinoIcons.house_fill : CupertinoIcons.house,
         MainTab.project =>
@@ -145,6 +147,8 @@ class NavigationItem extends ConsumerWidget {
       };
     }
     return switch (tab) {
+      MainTab.dashboard =>
+        selected ? Icons.dashboard_rounded : Icons.dashboard_outlined,
       MainTab.home =>
         selected ? CupertinoIcons.house_fill : CupertinoIcons.house,
       MainTab.project =>

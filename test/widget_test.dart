@@ -83,7 +83,7 @@ void main() {
     'primary navigation, filters, empty state and project contact flow work',
     (tester) async {
       await pumpPortfolio(tester);
-      await selectTab(tester, MainTab.home);
+      await selectTab(tester, MainTab.dashboard);
       await tester.tap(find.text('View Projects'));
       await tester.pumpAndSettle();
       expect(find.text('TaskFlow'), findsOneWidget);
@@ -111,33 +111,40 @@ void main() {
     },
   );
 
-  testWidgets('about and experience open and return home', (tester) async {
+  testWidgets('dashboard is the default and scrolls through the portfolio', (
+    tester,
+  ) async {
     await pumpPortfolio(tester);
-    for (final (label, expected) in [
-      ('About me', 'Education'),
-      ('Experience', 'Nimbus Labs · 2023 — Present'),
-    ]) {
-      await Scrollable.ensureVisible(
-        tester.element(find.text(label)),
-        alignment: .5,
-        duration: Duration.zero,
-      );
-      await tester.pumpAndSettle();
-      await tester.tap(find.text(label));
-      if (label == 'Experience') {
-        await tester.pump();
-        await tester.pump(const Duration(milliseconds: 1200));
-      } else {
-        await tester.pumpAndSettle();
-      }
-      expect(find.text(expected), findsOneWidget);
-      if (label == 'Experience') {
-        expect(find.text('ACTIVE'), findsOneWidget);
-      }
-      await tester.tap(find.text('Home'));
-      await tester.pumpAndSettle();
-      expect(find.text('Portfolio'), findsOneWidget);
-    }
+
+    expect(find.text('Dashboard'), findsWidgets);
+    expect(find.byKey(const ValueKey('nav-dashboard')), findsOneWidget);
+    expect(find.byKey(const ValueKey('nav-home')), findsOneWidget);
+    expect(find.text('Featured Work'), findsOneWidget);
+    expect(find.text('TaskFlow'), findsOneWidget);
+    expect(find.text('Skills and stack'), findsOneWidget);
+    expect(find.text('Nimbus Labs · 2023 — Present'), findsOneWidget);
+
+    final scrollable = find.byType(CustomScrollView).first;
+    final before = tester
+        .state<ScrollableState>(
+          find
+              .descendant(of: scrollable, matching: find.byType(Scrollable))
+              .first,
+        )
+        .position
+        .pixels;
+    await tester.drag(scrollable, const Offset(0, -500));
+    await tester.pumpAndSettle();
+    final after = tester
+        .state<ScrollableState>(
+          find
+              .descendant(of: scrollable, matching: find.byType(Scrollable))
+              .first,
+        )
+        .position
+        .pixels;
+
+    expect(after, greaterThan(before));
     expect(tester.takeException(), isNull);
   });
 

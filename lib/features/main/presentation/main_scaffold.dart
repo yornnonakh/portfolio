@@ -5,7 +5,7 @@ import '../../../core/widgets/glass_background.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
 import '../../../data/portfolio_providers.dart';
 import '../../contact/presentation/contact_screen.dart';
-
+import '../../dashboard/presentation/dashboard_screen.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../projects/presentation/projects_screen.dart';
 import '../../skills/presentation/skills_screen.dart';
@@ -22,9 +22,11 @@ class MainScaffold extends ConsumerWidget {
     final tab = ref.watch(navigationProvider);
     final wide = MediaQuery.sizeOf(context).width >= 900;
     return PopScope(
-      canPop: tab == MainTab.home,
+      canPop: tab == MainTab.dashboard,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) ref.read(navigationProvider.notifier).select(MainTab.home);
+        if (!didPop) {
+          ref.read(navigationProvider.notifier).select(MainTab.dashboard);
+        }
       },
       child: Scaffold(
         extendBody: true,
@@ -54,6 +56,10 @@ class MainScaffold extends ConsumerWidget {
                 child: IndexedStack(
                   index: tab.index,
                   children: [
+                    TickerMode(
+                      enabled: tab == MainTab.dashboard,
+                      child: DashboardScreen(motionEnabled: enableHomeMotion),
+                    ),
                     TickerMode(
                       enabled: tab == MainTab.home,
                       child: HomeScreen(motionEnabled: enableHomeMotion),
@@ -96,8 +102,9 @@ class _DesktopHeader extends ConsumerWidget {
           child: Row(
             children: [
               TextButton(
-                onPressed: () =>
-                    ref.read(navigationProvider.notifier).select(MainTab.home),
+                onPressed: () => ref
+                    .read(navigationProvider.notifier)
+                    .select(MainTab.dashboard),
                 child: Text(
                   '${profile.initials.toLowerCase()}.',
                   style: TextStyle(
