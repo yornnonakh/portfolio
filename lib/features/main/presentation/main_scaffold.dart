@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/availability_badge.dart';
 import '../../../core/widgets/glass_background.dart';
+import '../../../core/widgets/theme_toggle_button.dart';
 import '../../../data/portfolio_providers.dart';
 import '../../contact/presentation/contact_screen.dart';
-
+import '../../dashboard/presentation/dashboard_screen.dart';
 import '../../home/presentation/home_screen.dart';
 import '../../projects/presentation/projects_screen.dart';
 import '../../skills/presentation/skills_screen.dart';
@@ -22,65 +22,65 @@ class MainScaffold extends ConsumerWidget {
     final tab = ref.watch(navigationProvider);
     final wide = MediaQuery.sizeOf(context).width >= 900;
     return PopScope(
-      canPop: tab == MainTab.home,
+      canPop: tab == MainTab.dashboard,
       onPopInvokedWithResult: (didPop, result) {
-        if (!didPop) ref.read(navigationProvider.notifier).select(MainTab.home);
+        if (!didPop) {
+          ref.read(navigationProvider.notifier).select(MainTab.dashboard);
+        }
       },
       child: Scaffold(
-        body: GlassBackground(
-          child: SafeArea(
-            bottom: false,
-            child: Column(
-              children: [
-                if (wide) const _DesktopHeader(),
-                Expanded(
-                  child: Stack(
-                    children: [
-                      Positioned.fill(
-                        child: IndexedStack(
-                          index: tab.index,
-                          children: [
-                            TickerMode(
-                              enabled: tab == MainTab.home,
-                              child: HomeScreen(
-                                motionEnabled: enableHomeMotion,
-                              ),
-                            ),
-                            const ProjectsScreen(),
-                            const SkillsScreen(),
-                            const ContactScreen(),
-                          ],
-                        ),
-                      ),
-                      if (!wide)
-                        Positioned(
-                          left: MediaQuery.sizeOf(context).width <= 380
-                              ? 32
-                              : 24,
-                          right: MediaQuery.sizeOf(context).width <= 380
-                              ? 32
-                              : 24,
-                          bottom: 12,
-                          child: SafeArea(
-                            top: false,
-                            child: Center(
-                              child: ConstrainedBox(
-                                constraints: BoxConstraints(
-                                  maxWidth:
-                                      MediaQuery.sizeOf(context).width <= 380
-                                      ? 220
-                                      : 420,
-                                ),
-                                child: const CustomBottomBar(),
-                              ),
-                            ),
-                          ),
-                        ),
-                    ],
+        extendBody: true,
+        bottomNavigationBar: wide
+            ? null
+            : SafeArea(
+                minimum: EdgeInsets.fromLTRB(
+                  MediaQuery.sizeOf(context).width <= 360 ? 16 : 24,
+                  0,
+                  MediaQuery.sizeOf(context).width <= 360 ? 16 : 24,
+                  12,
+                ),
+                child: SizedBox(
+                  height: 68,
+                  child: Center(
+                    child: ConstrainedBox(
+                      constraints: const BoxConstraints(maxWidth: 430),
+                      child: const CustomBottomBar(),
+                    ),
                   ),
                 ),
-              ],
-            ),
+              ),
+        body: GlassBackground(
+          child: Column(
+            children: [
+              if (wide) SafeArea(bottom: false, child: const _DesktopHeader()),
+              Expanded(
+                child: IndexedStack(
+                  index: tab.index,
+                  children: [
+                    TickerMode(
+                      enabled: tab == MainTab.dashboard,
+                      child: DashboardScreen(motionEnabled: enableHomeMotion),
+                    ),
+                    TickerMode(
+                      enabled: tab == MainTab.home,
+                      child: HomeScreen(motionEnabled: enableHomeMotion),
+                    ),
+                    TickerMode(
+                      enabled: tab == MainTab.project,
+                      child: const ProjectsScreen(),
+                    ),
+                    TickerMode(
+                      enabled: tab == MainTab.skill,
+                      child: const SkillsScreen(),
+                    ),
+                    TickerMode(
+                      enabled: tab == MainTab.contact,
+                      child: const ContactScreen(),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -94,10 +94,8 @@ class _DesktopHeader extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final profile = ref.watch(profileProvider);
-    return Container(
-      decoration: const BoxDecoration(
-        border: Border(bottom: BorderSide(color: Color(0x12FFFFFF))),
-      ),
+    final theme = Theme.of(context);
+    return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 48, vertical: 22),
       child: Center(
         child: ConstrainedBox(
@@ -105,14 +103,15 @@ class _DesktopHeader extends ConsumerWidget {
           child: Row(
             children: [
               TextButton(
-                onPressed: () =>
-                    ref.read(navigationProvider.notifier).select(MainTab.home),
+                onPressed: () => ref
+                    .read(navigationProvider.notifier)
+                    .select(MainTab.dashboard),
                 child: Text(
                   '${profile.initials.toLowerCase()}.',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 28,
                     fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
+                    color: theme.colorScheme.onSurface,
                   ),
                 ),
               ),
@@ -122,6 +121,8 @@ class _DesktopHeader extends ConsumerWidget {
                 const SizedBox(width: 6),
               ],
               const Spacer(),
+              const ThemeToggleButton(),
+              const SizedBox(width: 12),
               AvailabilityBadge(compact: true, available: profile.available),
             ],
           ),

@@ -21,41 +21,43 @@ class ProfileHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final wide = MediaQuery.sizeOf(context).width >= 900;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Column(
       children: [
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         ProfileAvatar(
           initials: profile.initials,
           imageAsset: profile.avatarAsset,
-          size: wide ? 130 : 112,
+          size: wide ? 120 : 104,
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 22),
         Text(
           profile.name,
           textAlign: TextAlign.center,
           style: Theme.of(
             context,
-          ).textTheme.headlineLarge?.copyWith(fontSize: wide ? 46 : 34),
+          ).textTheme.headlineLarge?.copyWith(fontSize: wide ? 44 : 36),
         ),
         const SizedBox(height: 6),
         TypewriterText(
           text: profile.role,
           enabled: animateRole,
-          style: const TextStyle(
-            color: AppColors.primary,
-            fontSize: 19,
-            fontWeight: FontWeight.w500,
+          style: TextStyle(
+            color: primaryColor,
+            fontSize: 17,
+            fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 14),
+        const SizedBox(height: 12),
         Text(
           profile.tagline,
           textAlign: TextAlign.center,
           style: Theme.of(context).textTheme.bodyLarge,
         ),
-        const SizedBox(height: 22),
+        const SizedBox(height: 24),
         GlassCard(
-          padding: const EdgeInsets.symmetric(vertical: 17, horizontal: 8),
+          padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
           child: IntrinsicHeight(
             child: Row(
               children: [
@@ -68,8 +70,8 @@ class ProfileHeader extends StatelessWidget {
                         Text(
                           profile.stats[index].value,
                           style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 23,
+                            fontWeight: FontWeight.w700,
                             height: 1.2,
                           ),
                         ),
@@ -138,6 +140,9 @@ class ProfileAvatar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final brightness = Theme.of(context).brightness;
+    final primaryColor = Theme.of(context).colorScheme.primary;
+
     return Semantics(
       image: true,
       label: imageAsset == null
@@ -148,25 +153,22 @@ class ProfileAvatar extends StatelessWidget {
         child: Stack(
           children: [
             Container(
-              padding: const EdgeInsets.all(4),
-              decoration: const BoxDecoration(
+              padding: const EdgeInsets.all(3),
+              decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                gradient: SweepGradient(
-                  colors: [
-                    AppColors.primary,
-                    AppColors.coral,
-                    AppColors.purple,
-                    AppColors.blue,
-                    AppColors.primary,
-                  ],
-                  transform: GradientRotation(-1.57),
-                ),
+                color: primaryColor,
+                boxShadow: [
+                  BoxShadow(
+                    color: primaryColor.withValues(alpha: .22),
+                    blurRadius: 24,
+                  ),
+                ],
               ),
               child: Container(
-                padding: const EdgeInsets.all(4),
-                decoration: const BoxDecoration(
+                padding: const EdgeInsets.all(3),
+                decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  color: AppColors.surface,
+                  color: Theme.of(context).colorScheme.surface,
                 ),
                 child: SizedBox(
                   width: size - 16,
@@ -174,12 +176,16 @@ class ProfileAvatar extends StatelessWidget {
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       shape: BoxShape.circle,
-                      gradient: const LinearGradient(
-                        colors: [Color(0xFF242841), Color(0xFF161A2C)],
+                      gradient: LinearGradient(
+                        colors: brightness == Brightness.dark
+                            ? const [Color(0xFF2C2C2E), Color(0xFF1C1C1E)]
+                            : const [Color(0xFFFFFFFF), Color(0xFFE5E5EA)],
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                       ),
-                      border: Border.all(color: AppColors.glassBorder),
+                      border: Border.all(
+                        color: AppColors.glassBorderFor(brightness),
+                      ),
                     ),
                     child: ClipOval(
                       child: imageAsset == null
@@ -220,9 +226,12 @@ class ProfileAvatar extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.all(5),
                 decoration: BoxDecoration(
-                  color: AppColors.primary,
+                  color: primaryColor,
                   shape: BoxShape.circle,
-                  border: Border.all(color: AppColors.background, width: 4),
+                  border: Border.all(
+                    color: Theme.of(context).scaffoldBackgroundColor,
+                    width: 4,
+                  ),
                 ),
                 child: const Icon(
                   Icons.check_rounded,

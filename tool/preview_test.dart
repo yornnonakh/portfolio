@@ -46,8 +46,13 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    Future<void> capture(String name) async {
-      await tester.pumpAndSettle();
+    Future<void> capture(String name, {bool continuousMotion = false}) async {
+      if (continuousMotion) {
+        await tester.pump();
+        await tester.pump(const Duration(milliseconds: 1200));
+      } else {
+        await tester.pumpAndSettle();
+      }
       expect(tester.takeException(), isNull);
       final boundary =
           boundaryKey.currentContext!.findRenderObject()!
@@ -66,11 +71,7 @@ void main() {
     tester.view.physicalSize = const Size(366, 697);
     await capture('home_compact');
     tester.view.physicalSize = const Size(390, 844);
-    for (final tab in [
-      MainTab.project,
-      MainTab.skill,
-      MainTab.contact,
-    ]) {
+    for (final tab in [MainTab.project, MainTab.skill, MainTab.contact]) {
       await tester.tap(find.byKey(ValueKey('nav-${tab.name}')));
       await capture(tab.name);
     }
@@ -83,7 +84,7 @@ void main() {
       Navigator.of(
         tester.element(find.byType(Scaffold).first),
       ).push(MaterialPageRoute<void>(builder: (_) => page));
-      await capture(name);
+      await capture(name, continuousMotion: page is ExperienceScreen);
       Navigator.of(tester.element(find.byType(page.runtimeType))).pop();
       await tester.pumpAndSettle();
     }

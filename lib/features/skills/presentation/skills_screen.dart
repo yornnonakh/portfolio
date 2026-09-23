@@ -1,4 +1,3 @@
-import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/theme/app_colors.dart';
@@ -22,12 +21,12 @@ class SkillsScreen extends ConsumerWidget {
         LayoutBuilder(
           builder: (context, constraints) {
             final columns = constraints.maxWidth >= 760 ? 4 : 2;
-            const gap = 16.0;
+            const gap = 12.0;
             final width =
                 (constraints.maxWidth - (columns - 1) * gap) / columns;
             return Wrap(
               spacing: gap,
-              runSpacing: 20,
+              runSpacing: 12,
               children: [
                 for (final skill in skills)
                   SizedBox(
@@ -52,11 +51,11 @@ class _SkillCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final colors = switch (skill.tone) {
-      SkillTone.mint => const [Color(0xFF75DECF), Color(0xFF2DB4A1)],
-      SkillTone.violet => const [Color(0xFFA1AAFF), Color(0xFF7066F2)],
-      SkillTone.coral => const [Color(0xFFFFB996), Color(0xFFFF896B)],
-      SkillTone.sky => const [Color(0xFFA7E0F7), Color(0xFF5EB7EC)],
+    final color = switch (skill.tone) {
+      SkillTone.mint => const Color(0xFF30D158),
+      SkillTone.violet => const Color(0xFFBF5AF2),
+      SkillTone.coral => const Color(0xFFFF9F0A),
+      SkillTone.sky => const Color(0xFF64D2FF),
     };
     final percentage = '${(skill.proficiency * 100).round()}%';
     return Semantics(
@@ -64,59 +63,40 @@ class _SkillCard extends StatelessWidget {
       value: percentage,
       excludeSemantics: true,
       child: GlassCard(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 23),
-        child: LayoutBuilder(
-          builder: (context, constraints) {
-            final size = math.min(112.0, constraints.maxWidth);
-            return Column(
-              children: [
-                SizedBox.square(
-                  dimension: size,
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Positioned.fill(
-                        child: CircularProgressIndicator(
-                          value: skill.proficiency,
-                          strokeWidth: 9,
-                          strokeAlign: -1,
-                          backgroundColor: Colors.white.withValues(alpha: .12),
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      Container(
-                        width: size - 18,
-                        height: size - 18,
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: colors,
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: Text(
-                          percentage,
-                          style: const TextStyle(
-                            color: AppColors.ink,
-                            fontSize: 25,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-                const SizedBox(height: 18),
-                Text(
-                  skill.name,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ],
-            );
-          },
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 42,
+              height: 42,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: .16),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(Icons.code_rounded, color: color, size: 22),
+            ),
+            const SizedBox(height: 28),
+            Text(skill.name, style: Theme.of(context).textTheme.titleMedium),
+            const SizedBox(height: 4),
+            Text(
+              percentage,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
+            ),
+            const SizedBox(height: 12),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(99),
+              child: LinearProgressIndicator(
+                value: skill.proficiency,
+                minHeight: 4,
+                color: color,
+                backgroundColor: Colors.white.withValues(alpha: .08),
+              ),
+            ),
+          ],
         ),
       ),
     );

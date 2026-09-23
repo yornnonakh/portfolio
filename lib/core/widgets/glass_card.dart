@@ -1,7 +1,5 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
-
 import '../theme/app_colors.dart';
 
 class GlassCard extends StatelessWidget {
@@ -9,8 +7,8 @@ class GlassCard extends StatelessWidget {
     super.key,
     required this.child,
     this.padding = const EdgeInsets.all(22),
-    this.borderRadius = 26,
-    this.blur = 12,
+    this.borderRadius = 24,
+    this.blur = 28,
     this.onTap,
     this.semanticLabel,
   });
@@ -25,15 +23,27 @@ class GlassCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final radius = BorderRadius.circular(borderRadius);
+    final brightness = Theme.of(context).brightness;
+    final isDark = brightness == Brightness.dark;
+
     return ClipRRect(
       borderRadius: radius,
       child: BackdropFilter(
         filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
         child: DecoratedBox(
           decoration: BoxDecoration(
-            gradient: AppGradients.glass,
+            gradient: AppGradients.glassFor(brightness),
             borderRadius: radius,
-            border: Border.all(color: AppColors.glassBorder),
+            border: Border.all(color: AppColors.glassBorderFor(brightness)),
+            boxShadow: [
+              BoxShadow(
+                color: isDark
+                    ? Colors.black.withValues(alpha: .12)
+                    : Colors.black.withValues(alpha: .05),
+                blurRadius: 30,
+                offset: const Offset(0, 12),
+              ),
+            ],
           ),
           child: Material(
             type: MaterialType.transparency,
@@ -45,8 +55,12 @@ class GlassCard extends StatelessWidget {
                     child: InkWell(
                       onTap: onTap,
                       borderRadius: radius,
-                      hoverColor: Colors.white.withValues(alpha: .06),
-                      splashColor: AppColors.primary.withValues(alpha: .12),
+                      hoverColor: isDark
+                          ? Colors.white.withValues(alpha: .04)
+                          : Colors.black.withValues(alpha: .03),
+                      splashColor: isDark
+                          ? AppColors.primary.withValues(alpha: .12)
+                          : AppColors.primaryLight.withValues(alpha: .12),
                       child: Padding(padding: padding, child: child),
                     ),
                   ),

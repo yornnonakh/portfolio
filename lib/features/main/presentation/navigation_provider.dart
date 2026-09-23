@@ -1,9 +1,10 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum MainTab {
+  dashboard('Dashboard'),
   home('Home'),
-  project('Project'),
-  skill('Skill'),
+  project('Projects'),
+  skill('Skills'),
   contact('Contact');
 
   const MainTab(this.label);
@@ -16,7 +17,7 @@ final navigationProvider = NotifierProvider<NavigationController, MainTab>(
 
 class NavigationController extends Notifier<MainTab> {
   @override
-  MainTab build() => MainTab.home;
+  MainTab build() => MainTab.dashboard;
 
   void select(MainTab tab) => state = tab;
 }

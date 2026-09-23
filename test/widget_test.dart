@@ -79,11 +79,19 @@ void main() {
     expect(container.read(filteredProjectsProvider), hasLength(2));
   });
 
+  testWidgets('app exposes its production title', (tester) async {
+    await pumpPortfolio(tester);
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).title,
+      'Yorn Nona · Flutter Engineer',
+    );
+  });
+
   testWidgets(
     'primary navigation, filters, empty state and project contact flow work',
     (tester) async {
       await pumpPortfolio(tester);
-      await selectTab(tester, MainTab.home);
+      await selectTab(tester, MainTab.dashboard);
       await tester.tap(find.text('View Projects'));
       await tester.pumpAndSettle();
       expect(find.text('TaskFlow'), findsOneWidget);
@@ -100,6 +108,7 @@ void main() {
       expect(find.text('More good things are on the way.'), findsOneWidget);
       await tester.tap(find.text('Show all projects'));
       await tester.pumpAndSettle();
+      expect(find.text('Hive'), findsOneWidget);
       await tester.tap(find.text('Piisiit Note'));
       await tester.pumpAndSettle();
       expect(find.text('Thoughtfully built'), findsOneWidget);
@@ -111,20 +120,80 @@ void main() {
     },
   );
 
-  testWidgets('about and experience open and return home', (tester) async {
+  testWidgets('dashboard is the default and scrolls through the portfolio', (
+    tester,
+  ) async {
     await pumpPortfolio(tester);
-    for (final (label, expected) in [
-      ('About me', 'Education'),
-      ('Experience', 'Nimbus Labs · 2023 — Present'),
-    ]) {
-      await tester.ensureVisible(find.text(label));
-      await tester.tap(find.text(label));
-      await tester.pumpAndSettle();
-      expect(find.text(expected), findsOneWidget);
-      await tester.tap(find.text('Home'));
-      await tester.pumpAndSettle();
-      expect(find.text('Portfolio'), findsOneWidget);
-    }
+
+    expect(find.text('Dashboard'), findsWidgets);
+    expect(find.byKey(const ValueKey('nav-dashboard')), findsOneWidget);
+    expect(find.byKey(const ValueKey('nav-home')), findsOneWidget);
+    expect(find.text('Featured Work'), findsOneWidget);
+    expect(find.text('TaskFlow'), findsOneWidget);
+    expect(find.text('Skills and stack'), findsOneWidget);
+    expect(find.text('Nimbus Labs · 2023 — Present'), findsOneWidget);
+
+    final scrollable = find.byType(CustomScrollView).first;
+    final before = tester
+        .state<ScrollableState>(
+          find
+              .descendant(of: scrollable, matching: find.byType(Scrollable))
+              .first,
+        )
+        .position
+        .pixels;
+    await tester.drag(scrollable, const Offset(0, -500));
+    await tester.pumpAndSettle();
+    final after = tester
+        .state<ScrollableState>(
+          find
+              .descendant(of: scrollable, matching: find.byType(Scrollable))
+              .first,
+        )
+        .position
+        .pixels;
+
+    expect(after, greaterThan(before));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('floating navigation expands only the active destination', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester);
+
+    expect(
+      find.byKey(const ValueKey('bottom-navigation-pill')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('dashboard-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('nav-label-home')), findsNothing);
+    expect(find.byKey(const ValueKey('nav-label-project')), findsNothing);
+    expect(find.byIcon(Icons.dashboard_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.home_outlined), findsOneWidget);
+
+    await selectTab(tester, MainTab.home);
+
+    expect(find.byKey(const ValueKey('nav-label-home')), findsOneWidget);
+    expect(find.byIcon(Icons.dashboard_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.home_rounded), findsOneWidget);
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.home_rounded)).color,
+      Theme.of(
+        tester.element(find.byIcon(Icons.home_rounded)),
+      ).colorScheme.primary,
+    );
+
+    await selectTab(tester, MainTab.project);
+
+    expect(find.byKey(const ValueKey('nav-label-home')), findsNothing);
+    expect(find.byKey(const ValueKey('nav-label-project')), findsOneWidget);
+    expect(find.byIcon(Icons.home_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.grid_view_rounded), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('nav-dashboard')));
+    await tester.pumpAndSettle();
+    expect(find.text('Dashboard'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 
@@ -168,6 +237,71 @@ void main() {
     },
   );
 
+  testWidgets('page titles collapse into the top app bar while scrolling', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester);
+    await selectTab(tester, MainTab.skill);
+
+    final title = find.descendant(
+      of: find.byType(SliverAppBar),
+      matching: find.text('Skills'),
+    );
+    final expandedRect = tester.getRect(title);
+
+    await tester.drag(find.byType(CustomScrollView), const Offset(0, -360));
+    await tester.pumpAndSettle();
+
+    final collapsedRect = tester.getRect(title);
+    final viewportCenter = tester.getCenter(find.byType(CustomScrollView)).dx;
+    expect(expandedRect.left, lessThan(40));
+    expect(collapsedRect.center.dx, closeTo(viewportCenter, 1));
+    expect(collapsedRect.bottom, lessThan(expandedRect.bottom));
+    expect(collapsedRect.height, lessThan(expandedRect.height));
+    expect(
+      tester.widget<SliverAppBar>(find.byType(SliverAppBar)).backgroundColor,
+      Colors.transparent,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('theme toggle switches between light and dark modes', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester);
+    final toggleFinder = find
+        .byKey(const ValueKey('theme-toggle-button'))
+        .first;
+    expect(toggleFinder, findsOneWidget);
+
+    final startsDark =
+        Theme.of(tester.element(toggleFinder)).brightness == Brightness.dark;
+    expect(
+      find.byTooltip(
+        startsDark ? 'Switch to light mode' : 'Switch to dark mode',
+      ),
+      findsWidgets,
+    );
+
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+    expect(
+      find.byTooltip(
+        startsDark ? 'Switch to dark mode' : 'Switch to light mode',
+      ),
+      findsWidgets,
+    );
+
+    await tester.tap(toggleFinder);
+    await tester.pumpAndSettle();
+    expect(
+      find.byTooltip(
+        startsDark ? 'Switch to light mode' : 'Switch to dark mode',
+      ),
+      findsWidgets,
+    );
+  });
+
   for (final (size, scale) in [
     (const Size(320, 640), 1.0),
     (const Size(390, 844), 1.0),
@@ -192,7 +326,12 @@ void main() {
           Navigator.of(
             context,
           ).push(MaterialPageRoute<void>(builder: (_) => page));
-          await tester.pumpAndSettle();
+          if (page is ExperienceScreen) {
+            await tester.pump();
+            await tester.pump(const Duration(milliseconds: 1200));
+          } else {
+            await tester.pumpAndSettle();
+          }
           expect(tester.takeException(), isNull);
           Navigator.of(tester.element(find.byType(page.runtimeType))).pop();
           await tester.pumpAndSettle();

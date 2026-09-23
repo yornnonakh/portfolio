@@ -9,23 +9,31 @@ class TagChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final brightness = theme.brightness;
+    final isDark = brightness == Brightness.dark;
+
+    final bg = isDark
+        ? Colors.white.withValues(alpha: .06)
+        : Colors.black.withValues(alpha: .04);
+
     return DecoratedBox(
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: .07),
-        borderRadius: BorderRadius.circular(30),
-        border: Border.all(color: AppColors.glassBorder),
+        color: bg,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.glassBorderFor(brightness)),
       ),
       child: Padding(
         padding: EdgeInsets.symmetric(
-          horizontal: compact ? 12 : 17,
-          vertical: compact ? 6 : 10,
+          horizontal: compact ? 12 : 15,
+          vertical: compact ? 7 : 9,
         ),
         child: Text(
           label,
           style: TextStyle(
             fontSize: compact ? 13 : 15,
             fontWeight: FontWeight.w500,
-            color: AppColors.textSecondary,
+            color: AppColors.textSecondaryFor(brightness),
           ),
         ),
       ),

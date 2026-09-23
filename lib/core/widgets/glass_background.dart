@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import '../theme/app_colors.dart';
 
 class GlassBackground extends StatelessWidget {
   const GlassBackground({super.key, required this.child});
@@ -7,40 +6,56 @@ class GlassBackground extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    final primaryBlue = isDark
+        ? const Color(0x260A84FF)
+        : const Color(0x2E007AFF);
+    final secondarySky = isDark
+        ? const Color(0x145AC8FA)
+        : const Color(0x1F007AFF);
+    final accentPurple = isDark
+        ? const Color(0x0FBF5AF2)
+        : const Color(0x145856D6);
+
     return DecoratedBox(
-      decoration: const BoxDecoration(color: AppColors.background),
+      decoration: BoxDecoration(color: theme.scaffoldBackgroundColor),
       child: Stack(
         fit: StackFit.expand,
         children: [
-          const Positioned.fill(
+          Positioned.fill(
             child: RepaintBoundary(
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   gradient: RadialGradient(
-                    center: Alignment(-.95, -.95),
-                    radius: 1.08,
+                    center: const Alignment(-1.2, -1.1),
+                    radius: 1.15,
                     colors: [
-                      Color(0x78645CDD),
-                      Color(0x3C615BC7),
-                      Color(0x00615BC7),
+                      primaryBlue,
+                      primaryBlue.withValues(alpha: .25),
+                      primaryBlue.withValues(alpha: 0),
                     ],
-                    stops: [0, .35, 1],
+                    stops: const [0, .35, 1],
                   ),
                 ),
                 child: DecoratedBox(
                   decoration: BoxDecoration(
                     gradient: RadialGradient(
-                      center: Alignment(1.15, .55),
+                      center: const Alignment(1.15, .55),
                       radius: .95,
-                      colors: [Color(0x7821B8A6), Color(0x0021B8A6)],
+                      colors: [secondarySky, secondarySky.withValues(alpha: 0)],
                     ),
                   ),
                   child: DecoratedBox(
                     decoration: BoxDecoration(
                       gradient: RadialGradient(
-                        center: Alignment(-.65, 1.2),
+                        center: const Alignment(-.65, 1.2),
                         radius: .75,
-                        colors: [Color(0x55C56D61), Color(0x00C56D61)],
+                        colors: [
+                          accentPurple,
+                          accentPurple.withValues(alpha: 0),
+                        ],
                       ),
                     ),
                   ),

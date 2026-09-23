@@ -1,6 +1,6 @@
-# Flutter Portfolio
+# Yorn Nona · Flutter Portfolio
 
-A responsive, dark portfolio inspired by the supplied mobile designs. Built with Flutter, Riverpod, locally bundled Outfit typography, soft ambient gradients, and reusable glass components.
+A responsive Flutter portfolio built with Riverpod, locally bundled Outfit typography, soft ambient gradients, and reusable glass components. It supports light and dark themes, reduced motion, keyboard-accessible controls, and adaptive mobile/desktop layouts.
 
 ## Run
 
@@ -25,16 +25,15 @@ For iOS, Android, or desktop, use `flutter devices` and run `flutter run -d <dev
 
 Phones use a floating bottom navigation bar. The smallest phone breakpoint switches to the compact profile-first home treatment shown in the supplied reference; larger phones use the full Portfolio hero. Wide windows use top navigation and multiple columns. Content scrolls on smaller displays and supports larger system text. About and Experience open with native back navigation.
 
-## Personalize
+## Content checklist
 
-Edit **`lib/data/portfolio_content.dart`**. All names, employment history, statistics, proficiency values, projects, and contact details are sample data from the references, not verified personal claims.
+All public content is centralized in **`lib/data/portfolio_content.dart`**. Verify these details before publishing:
 
-1. Replace the profile, education, career history, skills, and projects with your information.
-2. Replace `assets/profile_photo.jpg` with your own portrait, or set `avatarAsset` to `null` to use the initials fallback.
-3. Replace the sample email and phone before publishing.
-4. Set each `SocialProfile.url` to enable its button; missing links are visibly disabled with a “Coming soon” tooltip.
-5. Set `PortfolioProject.url` to show a “Visit project” action in its detail sheet.
-6. Update `web/index.html` and `web/manifest.json` for your public title and description, and replace the generated platform launcher icons before release.
+1. Confirm the profile, statistics, education, career history, skills, and project claims are accurate.
+2. Confirm `assets/profile_photo.jpg`, email, phone number, and availability are intended to be public.
+3. Set each `SocialProfile.url` to enable its button; missing links remain disabled with a “Coming soon” tooltip.
+4. Set each `PortfolioProject.url` to show its “Visit project” action.
+5. Add your production domain as a canonical URL and `og:url` in `web/index.html` after the host is chosen.
 
 Contact opens the user's email application; the app has no email backend and does not send messages itself. If a platform cannot open a link, the app offers a copy action.
 
@@ -82,5 +81,25 @@ flutter test tool/preview_test.dart
 ```
 
 Images are saved to `build/previews/`. Outfit is bundled under the SIL Open Font License in `assets/fonts/OFL.txt`; the UI does not fetch fonts at runtime.
+
+## Deploy the web build
+
+Create the optimized static site:
+
+```sh
+flutter clean
+flutter pub get
+flutter analyze
+flutter test
+flutter build web --release
+```
+
+Deploy the contents of **`build/web/`** to any static host. Configure HTTPS, compression, and long-lived caching for hashed assets while serving `index.html` with a short cache lifetime. If hosting beneath a path such as `/portfolio/`, build with:
+
+```sh
+flutter build web --release --base-href /portfolio/
+```
+
+The repository includes production browser metadata, a web manifest, crawler rules, a branded SVG icon, responsive loading colors, and a no-JavaScript fallback. Add host-specific redirects only if path-based routes are introduced later.
 
 Architecture references: [Riverpod NotifierProvider](https://docs-v2.riverpod.dev/docs/providers/notifier_provider) and [Flutter adaptive UI](https://docs.flutter.dev/ui/adaptive-responsive).
