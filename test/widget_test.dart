@@ -79,6 +79,14 @@ void main() {
     expect(container.read(filteredProjectsProvider), hasLength(2));
   });
 
+  testWidgets('app exposes its production title', (tester) async {
+    await pumpPortfolio(tester);
+    expect(
+      tester.widget<MaterialApp>(find.byType(MaterialApp)).title,
+      'Yorn Nona · Flutter Engineer',
+    );
+  });
+
   testWidgets(
     'primary navigation, filters, empty state and project contact flow work',
     (tester) async {
@@ -100,6 +108,7 @@ void main() {
       expect(find.text('More good things are on the way.'), findsOneWidget);
       await tester.tap(find.text('Show all projects'));
       await tester.pumpAndSettle();
+      expect(find.text('Hive'), findsOneWidget);
       await tester.tap(find.text('Piisiit Note'));
       await tester.pumpAndSettle();
       expect(find.text('Thoughtfully built'), findsOneWidget);
@@ -145,6 +154,46 @@ void main() {
         .pixels;
 
     expect(after, greaterThan(before));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('floating navigation expands only the active destination', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester);
+
+    expect(
+      find.byKey(const ValueKey('bottom-navigation-pill')),
+      findsOneWidget,
+    );
+    expect(find.byKey(const ValueKey('dashboard-button')), findsOneWidget);
+    expect(find.byKey(const ValueKey('nav-label-home')), findsNothing);
+    expect(find.byKey(const ValueKey('nav-label-project')), findsNothing);
+    expect(find.byIcon(Icons.dashboard_rounded), findsOneWidget);
+    expect(find.byIcon(Icons.home_outlined), findsOneWidget);
+
+    await selectTab(tester, MainTab.home);
+
+    expect(find.byKey(const ValueKey('nav-label-home')), findsOneWidget);
+    expect(find.byIcon(Icons.dashboard_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.home_rounded), findsOneWidget);
+    expect(
+      tester.widget<Icon>(find.byIcon(Icons.home_rounded)).color,
+      Theme.of(
+        tester.element(find.byIcon(Icons.home_rounded)),
+      ).colorScheme.primary,
+    );
+
+    await selectTab(tester, MainTab.project);
+
+    expect(find.byKey(const ValueKey('nav-label-home')), findsNothing);
+    expect(find.byKey(const ValueKey('nav-label-project')), findsOneWidget);
+    expect(find.byIcon(Icons.home_outlined), findsOneWidget);
+    expect(find.byIcon(Icons.grid_view_rounded), findsOneWidget);
+
+    await tester.tap(find.byKey(const ValueKey('nav-dashboard')));
+    await tester.pumpAndSettle();
+    expect(find.text('Dashboard'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 

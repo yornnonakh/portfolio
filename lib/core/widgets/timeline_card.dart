@@ -28,8 +28,8 @@ class TimelineCard extends StatelessWidget {
     final border = highlighted
         ? accent.withValues(alpha: .3)
         : (isDark
-            ? Colors.white.withValues(alpha: .09)
-            : Colors.black.withValues(alpha: .08));
+              ? Colors.white.withValues(alpha: .09)
+              : Colors.black.withValues(alpha: .08));
 
     final content = Padding(padding: const EdgeInsets.all(20), child: child);
     return Semantics(

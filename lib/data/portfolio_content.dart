@@ -1,11 +1,11 @@
 import 'models/portfolio.dart';
 
-/// Sample content from the design references. Replace these values with your
-/// own information before publishing. No personal accounts are assumed.
+/// Centralized portfolio content. Verify public claims and links before each
+/// release so every surface stays consistent.
 abstract final class PortfolioContent {
   static const profile = PortfolioProfile(
     name: 'Yorn Nona',
-    initials: 'AC',
+    initials: 'YN',
     avatarAsset: 'assets/profile_photo.jpg',
     role: 'Senior Flutter Engineer',
     tagline:
@@ -25,7 +25,7 @@ abstract final class PortfolioContent {
       PortfolioStat('1.8M', 'Installs'),
     ],
     education: Education(
-      degree: 'SoftWare Development',
+      degree: 'Software Development',
       school: 'Norton University',
       period: '2019 – 2023',
     ),

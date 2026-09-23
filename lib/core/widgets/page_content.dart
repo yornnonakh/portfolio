@@ -38,8 +38,10 @@ class _PageContentState extends State<PageContent> {
     final expandedHeight = wide ? 118.0 : 110.0;
 
     // Top blue glow expanding on scroll/overscroll at top full screen
-    final topGlowHeight =
-        (180.0 + topPadding - _scrollOffset * 0.9).clamp(0.0, 360.0);
+    final topGlowHeight = (180.0 + topPadding - _scrollOffset * 0.9).clamp(
+      0.0,
+      360.0,
+    );
     final topGlowOpacity = _scrollOffset <= 0
         ? 1.0
         : (1.0 - (_scrollOffset / 120.0)).clamp(0.2, 1.0);
@@ -126,11 +128,8 @@ class _PageContentState extends State<PageContent> {
                 ],
                 flexibleSpace: LayoutBuilder(
                   builder: (context, constraints) {
-                    final currentExtent =
-                        (constraints.maxHeight - topPadding).clamp(
-                      toolbarHeight,
-                      expandedHeight,
-                    );
+                    final currentExtent = (constraints.maxHeight - topPadding)
+                        .clamp(toolbarHeight, expandedHeight);
                     final expanded =
                         ((currentExtent - toolbarHeight) /
                                 (expandedHeight - toolbarHeight))

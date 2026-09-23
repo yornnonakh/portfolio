@@ -33,16 +33,17 @@ class MainScaffold extends ConsumerWidget {
         bottomNavigationBar: wide
             ? null
             : SafeArea(
-                minimum: const EdgeInsets.fromLTRB(24, 0, 24, 12),
+                minimum: EdgeInsets.fromLTRB(
+                  MediaQuery.sizeOf(context).width <= 360 ? 16 : 24,
+                  0,
+                  MediaQuery.sizeOf(context).width <= 360 ? 16 : 24,
+                  12,
+                ),
                 child: SizedBox(
-                  height: 66,
+                  height: 68,
                   child: Center(
                     child: ConstrainedBox(
-                      constraints: BoxConstraints(
-                        maxWidth: MediaQuery.sizeOf(context).width <= 380
-                            ? 220
-                            : 420,
-                      ),
+                      constraints: const BoxConstraints(maxWidth: 430),
                       child: const CustomBottomBar(),
                     ),
                   ),

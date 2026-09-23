@@ -82,7 +82,7 @@ class _SkillCard extends StatelessWidget {
             const SizedBox(height: 4),
             Text(
               percentage,
-          style: Theme.of(
+              style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: AppColors.textMuted),
             ),

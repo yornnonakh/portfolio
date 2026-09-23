@@ -69,17 +69,11 @@ class _ProjectDetails extends ConsumerWidget {
             style: TextStyle(color: primaryColor, fontWeight: FontWeight.w600),
           ),
           const SizedBox(height: 18),
-          Text(
-            project.description,
-            style: theme.textTheme.bodyLarge,
-          ),
+          Text(project.description, style: theme.textTheme.bodyLarge),
           const SizedBox(height: 20),
           TagList(project.technologies, compact: true),
           const SizedBox(height: 28),
-          Text(
-            'Thoughtfully built',
-            style: theme.textTheme.titleMedium,
-          ),
+          Text('Thoughtfully built', style: theme.textTheme.titleMedium),
           const SizedBox(height: 14),
           for (final feature in project.features)
             Padding(
@@ -97,10 +91,7 @@ class _ProjectDetails extends ConsumerWidget {
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
-                      feature,
-                      style: theme.textTheme.bodyMedium,
-                    ),
+                    child: Text(feature, style: theme.textTheme.bodyMedium),
                   ),
                 ],
               ),

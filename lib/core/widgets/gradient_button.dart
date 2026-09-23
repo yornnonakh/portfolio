@@ -27,9 +27,7 @@ class GradientButton extends StatelessWidget {
         ? Colors.white.withValues(alpha: .06)
         : Colors.black.withValues(alpha: .04);
 
-    final foreground = outlined
-        ? theme.colorScheme.onSurface
-        : Colors.white;
+    final foreground = outlined ? theme.colorScheme.onSurface : Colors.white;
 
     return DecoratedBox(
       decoration: BoxDecoration(

@@ -54,9 +54,9 @@ class _AnimatedExperienceTimelineState
   void didChangeDependencies() {
     super.didChangeDependencies();
     _reducedMotion = MediaQuery.disableAnimationsOf(context);
-    final isTest = WidgetsBinding.instance.runtimeType
-        .toString()
-        .contains('Test');
+    final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
+      'Test',
+    );
     if (_reducedMotion || isTest) {
       _controller.value = 1;
       _flowController

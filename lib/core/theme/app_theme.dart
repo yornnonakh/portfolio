@@ -86,21 +86,9 @@ abstract final class AppTheme {
           height: 1.4,
           color: textPrimary,
         ),
-        bodyLarge: TextStyle(
-          fontSize: 16,
-          height: 1.5,
-          color: textSecondary,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          height: 1.5,
-          color: textSecondary,
-        ),
-        bodySmall: TextStyle(
-          fontSize: 12,
-          height: 1.4,
-          color: textMuted,
-        ),
+        bodyLarge: TextStyle(fontSize: 16, height: 1.5, color: textSecondary),
+        bodyMedium: TextStyle(fontSize: 14, height: 1.5, color: textSecondary),
+        bodySmall: TextStyle(fontSize: 12, height: 1.4, color: textMuted),
         labelLarge: TextStyle(
           fontSize: 15,
           fontWeight: FontWeight.w600,
@@ -134,10 +122,7 @@ abstract final class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: snackBarBackground,
-        contentTextStyle: TextStyle(
-          fontFamily: 'Outfit',
-          color: textPrimary,
-        ),
+        contentTextStyle: TextStyle(fontFamily: 'Outfit', color: textPrimary),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),

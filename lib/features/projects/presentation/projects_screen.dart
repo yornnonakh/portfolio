@@ -81,9 +81,9 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
     super.didChangeDependencies();
     _reducedMotion = MediaQuery.disableAnimationsOf(context);
     final tickerEnabled = TickerMode.valuesOf(context).enabled;
-    final isTest = WidgetsBinding.instance.runtimeType
-        .toString()
-        .contains('Test');
+    final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
+      'Test',
+    );
     if (_reducedMotion || !tickerEnabled || isTest) {
       _controller.value = 1;
       _flowController
@@ -257,7 +257,9 @@ class _CategorySelector extends StatelessWidget {
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
-    final containerBg = isDark ? const Color(0xFF111521) : const Color(0xFFE5E5EA);
+    final containerBg = isDark
+        ? const Color(0xFF111521)
+        : const Color(0xFFE5E5EA);
     final border = isDark
         ? Colors.white.withValues(alpha: .08)
         : Colors.black.withValues(alpha: .06);
@@ -301,7 +303,9 @@ class _CategoryButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final brightness = Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
-    final selectedBg = isDark ? const Color(0xFF343947) : const Color(0xFFFFFFFF);
+    final selectedBg = isDark
+        ? const Color(0xFF343947)
+        : const Color(0xFFFFFFFF);
 
     return Semantics(
       selected: selected,
@@ -315,7 +319,9 @@ class _CategoryButton extends StatelessWidget {
           boxShadow: selected
               ? [
                   BoxShadow(
-                    color: isDark ? const Color(0x50000000) : const Color(0x18000000),
+                    color: isDark
+                        ? const Color(0x50000000)
+                        : const Color(0x18000000),
                     blurRadius: 5,
                     offset: const Offset(0, 2),
                   ),
@@ -356,7 +362,9 @@ class _IosEmptyState extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final containerBg = isDark ? const Color(0xFF141925) : const Color(0xFFFFFFFF);
+    final containerBg = isDark
+        ? const Color(0xFF141925)
+        : const Color(0xFFFFFFFF);
     final border = isDark
         ? Colors.white.withValues(alpha: .09)
         : Colors.black.withValues(alpha: .08);

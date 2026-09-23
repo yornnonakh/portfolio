@@ -3,8 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 enum MainTab {
   dashboard('Dashboard'),
   home('Home'),
-  project('Project'),
-  skill('Skill'),
+  project('Projects'),
+  skill('Skills'),
   contact('Contact');
 
   const MainTab(this.label);

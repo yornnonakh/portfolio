@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <!--
     If you are serving your web app in a path other than the root, change the
@@ -17,27 +17,37 @@
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
-  <meta name="theme-color" content="#0A0D19">
+  <meta name="theme-color" content="#0A84FF">
+  <meta name="color-scheme" content="light dark">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="A Flutter engineer’s portfolio — selected projects, experience, and thoughtful mobile experiences.">
+  <meta name="description" content="Yorn Nona is a Flutter engineer in Phnom Penh building thoughtful, accessible mobile products. Explore selected projects, skills, and experience.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Yorn Nona · Flutter Engineer">
+  <meta property="og:description" content="Selected Flutter projects, mobile engineering experience, and ways to get in touch.">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Yorn Nona · Flutter Engineer">
+  <meta name="twitter:description" content="Selected Flutter projects, mobile engineering experience, and ways to get in touch.">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
-  <meta name="apple-mobile-web-app-title" content="portfolio">
-  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+  <meta name="apple-mobile-web-app-title" content="Yorn Nona">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/png" href="favicon.png"/>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
 
-  <title>Portfolio · Flutter Engineer</title>
+  <title>Yorn Nona · Flutter Engineer</title>
   <link rel="manifest" href="manifest.json">
   <style>
-    html, body { margin: 0; height: 100%; background: #0a0d19; }
+    html, body { margin: 0; height: 100%; background: #000; }
     #loading { position: fixed; inset: 0; display: grid; place-items: center; }
     #loading span { width: 30px; height: 30px; border: 2px solid #252940; border-top-color: #7de3d2; border-radius: 50%; animation: spin 1s linear infinite; }
     @keyframes spin { to { transform: rotate(360deg); } }
     @media (prefers-reduced-motion: reduce) { #loading span { animation: none; } }
+    @media (prefers-color-scheme: light) {
+      html, body { background: #f2f2f7; }
+      #loading span { border-color: #d1d1d6; border-top-color: #007aff; }
+    }
   </style>
 </head>
 <body>
