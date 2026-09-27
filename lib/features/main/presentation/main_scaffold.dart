@@ -12,15 +12,49 @@ import '../../skills/presentation/skills_screen.dart';
 import 'custom_bottom_bar.dart';
 import 'navigation_provider.dart';
 
-class MainScaffold extends ConsumerWidget {
+class MainScaffold extends ConsumerStatefulWidget {
   const MainScaffold({super.key, this.enableHomeMotion = true});
 
   final bool enableHomeMotion;
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<MainScaffold> createState() => _MainScaffoldState();
+}
+
+class _MainScaffoldState extends ConsumerState<MainScaffold> {
+  final PageController _pageController = PageController();
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
+
+  void _showPage(MainTab tab) {
+    if (!_pageController.hasClients ||
+        _pageController.page?.round() == tab.index) {
+      return;
+    }
+
+    _pageController.animateToPage(
+      tab.index,
+      duration: MediaQuery.disableAnimationsOf(context)
+          ? Duration.zero
+          : const Duration(milliseconds: 280),
+      curve: Curves.easeOutCubic,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final tab = ref.watch(navigationProvider);
     final wide = MediaQuery.sizeOf(context).width >= 900;
+    ref.listen(navigationProvider, (_, next) {
+      if (!wide) {
+        _showPage(next);
+      }
+    });
+
     return PopScope(
       canPop: tab == MainTab.dashboard,
       onPopInvokedWithResult: (didPop, result) {
@@ -54,31 +88,16 @@ class MainScaffold extends ConsumerWidget {
             children: [
               if (wide) SafeArea(bottom: false, child: const _DesktopHeader()),
               Expanded(
-                child: IndexedStack(
-                  index: tab.index,
-                  children: [
-                    TickerMode(
-                      enabled: tab == MainTab.dashboard,
-                      child: DashboardScreen(motionEnabled: enableHomeMotion),
-                    ),
-                    TickerMode(
-                      enabled: tab == MainTab.home,
-                      child: HomeScreen(motionEnabled: enableHomeMotion),
-                    ),
-                    TickerMode(
-                      enabled: tab == MainTab.project,
-                      child: const ProjectsScreen(),
-                    ),
-                    TickerMode(
-                      enabled: tab == MainTab.skill,
-                      child: const SkillsScreen(),
-                    ),
-                    TickerMode(
-                      enabled: tab == MainTab.contact,
-                      child: const ContactScreen(),
-                    ),
-                  ],
-                ),
+                child: wide
+                    ? IndexedStack(index: tab.index, children: _pages(tab))
+                    : PageView(
+                        key: const ValueKey('section-page-view'),
+                        controller: _pageController,
+                        onPageChanged: (index) => ref
+                            .read(navigationProvider.notifier)
+                            .select(MainTab.values[index]),
+                        children: _pages(tab),
+                      ),
               ),
             ],
           ),
@@ -86,6 +105,20 @@ class MainScaffold extends ConsumerWidget {
       ),
     );
   }
+
+  List<Widget> _pages(MainTab tab) => [
+    TickerMode(
+      enabled: tab == MainTab.dashboard,
+      child: DashboardScreen(motionEnabled: widget.enableHomeMotion),
+    ),
+    TickerMode(
+      enabled: tab == MainTab.home,
+      child: HomeScreen(motionEnabled: widget.enableHomeMotion),
+    ),
+    TickerMode(enabled: tab == MainTab.project, child: const ProjectsScreen()),
+    TickerMode(enabled: tab == MainTab.skill, child: const SkillsScreen()),
+    TickerMode(enabled: tab == MainTab.contact, child: const ContactScreen()),
+  ];
 }
 
 class _DesktopHeader extends ConsumerWidget {

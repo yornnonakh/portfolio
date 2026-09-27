@@ -1,6 +1,7 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
+
 import '../theme/app_colors.dart';
+import 'liquid_glass_surface.dart';
 
 class GlassCard extends StatelessWidget {
   const GlassCard({
@@ -22,50 +23,33 @@ class GlassCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final radius = BorderRadius.circular(borderRadius);
     final brightness = Theme.of(context).brightness;
     final isDark = brightness == Brightness.dark;
+    final radius = BorderRadius.circular(borderRadius);
 
-    return ClipRRect(
-      borderRadius: radius,
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: blur, sigmaY: blur),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: AppGradients.glassFor(brightness),
-            borderRadius: radius,
-            border: Border.all(color: AppColors.glassBorderFor(brightness)),
-            boxShadow: [
-              BoxShadow(
-                color: isDark
-                    ? Colors.black.withValues(alpha: .12)
-                    : Colors.black.withValues(alpha: .05),
-                blurRadius: 30,
-                offset: const Offset(0, 12),
+    return LiquidGlassSurface(
+      borderRadius: borderRadius,
+      frost: blur / 4,
+      elevated: true,
+      child: Material(
+        type: MaterialType.transparency,
+        child: onTap == null
+            ? Padding(padding: padding, child: child)
+            : Semantics(
+                button: true,
+                label: semanticLabel,
+                child: InkWell(
+                  onTap: onTap,
+                  borderRadius: radius,
+                  hoverColor: isDark
+                      ? Colors.white.withValues(alpha: .04)
+                      : Colors.black.withValues(alpha: .03),
+                  splashColor: isDark
+                      ? AppColors.primary.withValues(alpha: .12)
+                      : AppColors.primaryLight.withValues(alpha: .12),
+                  child: Padding(padding: padding, child: child),
+                ),
               ),
-            ],
-          ),
-          child: Material(
-            type: MaterialType.transparency,
-            child: onTap == null
-                ? Padding(padding: padding, child: child)
-                : Semantics(
-                    button: true,
-                    label: semanticLabel,
-                    child: InkWell(
-                      onTap: onTap,
-                      borderRadius: radius,
-                      hoverColor: isDark
-                          ? Colors.white.withValues(alpha: .04)
-                          : Colors.black.withValues(alpha: .03),
-                      splashColor: isDark
-                          ? AppColors.primary.withValues(alpha: .12)
-                          : AppColors.primaryLight.withValues(alpha: .12),
-                      child: Padding(padding: padding, child: child),
-                    ),
-                  ),
-          ),
-        ),
       ),
     );
   }

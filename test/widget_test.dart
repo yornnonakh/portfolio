@@ -1,8 +1,12 @@
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as liquid;
 import 'package:portfolio/app.dart';
+import 'package:portfolio/core/widgets/glass_card.dart' as portfolio;
 import 'package:portfolio/core/services/link_service.dart';
 import 'package:portfolio/data/models/portfolio.dart';
 import 'package:portfolio/data/portfolio_content.dart';
@@ -48,7 +52,21 @@ Future<void> pumpPortfolio(
 }
 
 Future<void> selectTab(WidgetTester tester, MainTab tab) async {
-  await tester.tap(find.byKey(ValueKey('nav-${tab.name}')));
+  final destination = find.byKey(ValueKey('nav-${tab.name}'));
+  if (destination.evaluate().isNotEmpty) {
+    await tester.ensureVisible(destination);
+    await tester.pumpAndSettle();
+    await tester.tap(destination);
+  } else {
+    final bar = find.byType(liquid.GlassTabBar);
+    final rect = tester.getRect(bar);
+    await tester.tapAt(
+      Offset(
+        rect.left + rect.width * (tab.index + .5) / MainTab.values.length,
+        rect.center.dy,
+      ),
+    );
+  }
   await tester.pumpAndSettle();
 }
 
@@ -126,8 +144,11 @@ void main() {
     await pumpPortfolio(tester);
 
     expect(find.text('Dashboard'), findsWidgets);
-    expect(find.byKey(const ValueKey('nav-dashboard')), findsOneWidget);
-    expect(find.byKey(const ValueKey('nav-home')), findsOneWidget);
+    expect(find.byType(liquid.GlassTabBar), findsOneWidget);
+    expect(
+      tester.widget<liquid.GlassTabBar>(find.byType(liquid.GlassTabBar)).tabs,
+      hasLength(MainTab.values.length),
+    );
     expect(find.text('Featured Work'), findsOneWidget);
     expect(find.text('TaskFlow'), findsOneWidget);
     expect(find.text('Skills and stack'), findsOneWidget);
@@ -157,43 +178,141 @@ void main() {
     expect(tester.takeException(), isNull);
   });
 
-  testWidgets('floating navigation expands only the active destination', (
+  testWidgets('package-native bottom navigation stays synced with sections', (
     tester,
   ) async {
     await pumpPortfolio(tester);
 
-    expect(
-      find.byKey(const ValueKey('bottom-navigation-pill')),
-      findsOneWidget,
-    );
-    expect(find.byKey(const ValueKey('dashboard-button')), findsOneWidget);
-    expect(find.byKey(const ValueKey('nav-label-home')), findsNothing);
-    expect(find.byKey(const ValueKey('nav-label-project')), findsNothing);
-    expect(find.byIcon(Icons.dashboard_rounded), findsOneWidget);
-    expect(find.byIcon(Icons.home_outlined), findsOneWidget);
+    liquid.GlassTabBar bar() =>
+        tester.widget<liquid.GlassTabBar>(find.byType(liquid.GlassTabBar));
+
+    expect(find.byType(liquid.GlassTabBar), findsOneWidget);
+    expect(bar().selectedIndex, MainTab.dashboard.index);
+    expect(bar().indicatorPinchStrength, greaterThan(0));
+    expect(bar().indicatorColor, isNull);
+    expect(bar().selectedIconColor, isNull);
+    expect(bar().selectedLabelColor, isNull);
+    expect(bar().settings, isNull);
+    expect(bar().indicatorSettings, isNull);
 
     await selectTab(tester, MainTab.home);
-
-    expect(find.byKey(const ValueKey('nav-label-home')), findsOneWidget);
-    expect(find.byIcon(Icons.dashboard_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.home_rounded), findsOneWidget);
-    expect(
-      tester.widget<Icon>(find.byIcon(Icons.home_rounded)).color,
-      Theme.of(
-        tester.element(find.byIcon(Icons.home_rounded)),
-      ).colorScheme.primary,
-    );
+    expect(bar().selectedIndex, MainTab.home.index);
 
     await selectTab(tester, MainTab.project);
+    expect(bar().selectedIndex, MainTab.project.index);
 
-    expect(find.byKey(const ValueKey('nav-label-home')), findsNothing);
-    expect(find.byKey(const ValueKey('nav-label-project')), findsOneWidget);
-    expect(find.byIcon(Icons.home_outlined), findsOneWidget);
-    expect(find.byIcon(Icons.grid_view_rounded), findsOneWidget);
-
-    await tester.tap(find.byKey(const ValueKey('nav-dashboard')));
-    await tester.pumpAndSettle();
+    await selectTab(tester, MainTab.dashboard);
+    expect(bar().selectedIndex, MainTab.dashboard.index);
     expect(find.text('Dashboard'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('mobile sections swipe horizontally and keep navigation synced', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester, size: const Size(320, 640));
+
+    final pageView = find.byKey(const ValueKey('section-page-view'));
+    expect(pageView, findsOneWidget);
+    final bottomBar = find.byType(liquid.GlassTabBar);
+    expect(bottomBar, findsOneWidget);
+
+    final barBeforeScroll = tester.getRect(bottomBar);
+    await tester.drag(
+      find.byType(CustomScrollView).first,
+      const Offset(0, -300),
+    );
+    await tester.pumpAndSettle();
+    final barAfterScroll = tester.getRect(bottomBar);
+    expect(barAfterScroll.top, barBeforeScroll.top);
+
+    await tester.drag(pageView, const Offset(-280, 0));
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<liquid.GlassTabBar>(bottomBar).selectedIndex,
+      MainTab.home.index,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('liquid indicator follows a held drag and selects on release', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester, size: const Size(390, 844));
+
+    final bar = find.byType(liquid.GlassTabBar);
+    final rect = tester.getRect(bar);
+    final start = Offset(rect.left + rect.width * .1, rect.center.dy);
+
+    await tester.timedDragFrom(
+      start,
+      Offset(rect.width * .4, 0),
+      const Duration(milliseconds: 800),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      tester.widget<liquid.GlassTabBar>(bar).selectedIndex,
+      MainTab.project.index,
+    );
+    expect(find.text('Projects'), findsWidgets);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('project category header supports held horizontal dragging', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester, size: const Size(320, 640));
+    await selectTab(tester, MainTab.project);
+
+    final categoryHeader = find.byKey(
+      const ValueKey('project-category-scroll'),
+    );
+    final segmentedControl = tester.widget<liquid.GlassSegmentedControl>(
+      categoryHeader,
+    );
+    expect(segmentedControl.backgroundColor, isNull);
+    expect(segmentedControl.indicatorColor, isNull);
+    expect(segmentedControl.dragBehavior, liquid.SegmentDragBehavior.scroll);
+    final categoryScroll = find.descendant(
+      of: categoryHeader,
+      matching: find.byType(Scrollable),
+    );
+    final position = tester.state<ScrollableState>(categoryScroll).position;
+    expect(position.maxScrollExtent, greaterThan(0));
+
+    final scrollConfiguration = tester.widget<ScrollConfiguration>(
+      find
+          .ancestor(
+            of: categoryHeader,
+            matching: find.byType(ScrollConfiguration),
+          )
+          .first,
+    );
+    expect(
+      scrollConfiguration.behavior.dragDevices,
+      containsAll({
+        PointerDeviceKind.touch,
+        PointerDeviceKind.mouse,
+        PointerDeviceKind.stylus,
+        PointerDeviceKind.trackpad,
+      }),
+    );
+
+    await tester.drag(categoryHeader, const Offset(-120, 0));
+    await tester.pumpAndSettle();
+    expect(position.pixels, greaterThan(0));
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('content cards use the reusable liquid glass surface', (
+    tester,
+  ) async {
+    await pumpPortfolio(tester);
+
+    expect(find.byType(portfolio.GlassCard), findsWidgets);
+    expect(find.byType(liquid.GlassContainer), findsWidgets);
     expect(tester.takeException(), isNull);
   });
 

@@ -1,7 +1,11 @@
 import 'dart:math' as math;
+import 'dart:ui' show PointerDeviceKind;
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as liquid;
+
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/page_content.dart';
 import '../../../core/widgets/timeline_card.dart';
@@ -255,99 +259,36 @@ class _CategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final isDark = brightness == Brightness.dark;
-    final containerBg = isDark
-        ? const Color(0xFF111521)
-        : const Color(0xFFE5E5EA);
-    final border = isDark
-        ? Colors.white.withValues(alpha: .08)
-        : Colors.black.withValues(alpha: .06);
-
-    return SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: Container(
-        padding: const EdgeInsets.all(4),
-        decoration: BoxDecoration(
-          color: containerBg,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: border),
-        ),
-        child: Row(
-          children: [
-            for (final category in ProjectCategory.values)
-              _CategoryButton(
-                category: category,
-                selected: selected == category,
-                onPressed: () => onSelected(category),
-              ),
-          ],
-        ),
+    return ScrollConfiguration(
+      behavior: ScrollConfiguration.of(context).copyWith(
+        dragDevices: const {
+          PointerDeviceKind.touch,
+          PointerDeviceKind.mouse,
+          PointerDeviceKind.stylus,
+          PointerDeviceKind.trackpad,
+          PointerDeviceKind.unknown,
+        },
+        scrollbars: false,
       ),
-    );
-  }
-}
-
-class _CategoryButton extends StatelessWidget {
-  const _CategoryButton({
-    required this.category,
-    required this.selected,
-    required this.onPressed,
-  });
-
-  final ProjectCategory category;
-  final bool selected;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final brightness = Theme.of(context).brightness;
-    final isDark = brightness == Brightness.dark;
-    final selectedBg = isDark
-        ? const Color(0xFF343947)
-        : const Color(0xFFFFFFFF);
-
-    return Semantics(
-      selected: selected,
-      button: true,
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          color: selected ? selectedBg : Colors.transparent,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: selected
-              ? [
-                  BoxShadow(
-                    color: isDark
-                        ? const Color(0x50000000)
-                        : const Color(0x18000000),
-                    blurRadius: 5,
-                    offset: const Offset(0, 2),
-                  ),
-                ]
-              : null,
-        ),
-        child: TextButton(
-          onPressed: onPressed,
-          style: TextButton.styleFrom(
-            foregroundColor: selected
-                ? AppColors.textPrimaryFor(brightness)
-                : AppColors.textSecondaryFor(brightness),
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-            minimumSize: const Size(48, 38),
-            tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(10),
+      child: liquid.GlassSegmentedControl.scrollable(
+        key: const ValueKey('project-category-scroll'),
+        segments: [
+          for (final category in ProjectCategory.values)
+            liquid.GlassSegment(
+              id: category,
+              label: category.label,
+              semanticLabel: category.label,
             ),
-            textStyle: const TextStyle(
-              fontFamily: 'Outfit',
-              fontSize: 13,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          child: Text(category.label),
-        ),
+        ],
+        selectedIndex: selected.index,
+        onSegmentSelected: (index) =>
+            onSelected(ProjectCategory.values[index]),
+        useOwnLayer: true,
+        quality: liquid.GlassQuality.standard,
+        height: 46,
+        borderRadius: 14,
+        dragBehavior: liquid.SegmentDragBehavior.scroll,
+        labelPadding: const EdgeInsets.symmetric(horizontal: 14),
       ),
     );
   }
