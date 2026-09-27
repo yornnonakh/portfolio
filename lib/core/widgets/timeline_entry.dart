@@ -1,7 +1,5 @@
 import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
-
 import '../theme/app_colors.dart';
 
 /// Shares the animated rail between the project and experience timelines.

@@ -1,12 +1,11 @@
 import 'dart:math' as math;
 import 'dart:ui' show PointerDeviceKind;
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as liquid;
-
 import '../../../core/theme/app_colors.dart';
+import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/page_content.dart';
 import '../../../core/widgets/timeline_card.dart';
 import '../../../core/widgets/timeline_entry.dart';
@@ -302,21 +301,10 @@ class _IosEmptyState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final containerBg = isDark
-        ? const Color(0xFF141925)
-        : const Color(0xFFFFFFFF);
-    final border = isDark
-        ? Colors.white.withValues(alpha: .09)
-        : Colors.black.withValues(alpha: .08);
 
-    return Container(
+    return GlassCard(
       padding: const EdgeInsets.fromLTRB(24, 34, 24, 28),
-      decoration: BoxDecoration(
-        color: containerBg,
-        borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: border),
-      ),
+      borderRadius: 22,
       child: Column(
         children: [
           Icon(

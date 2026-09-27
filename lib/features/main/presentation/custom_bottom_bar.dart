@@ -9,31 +9,26 @@ const _bottomTabs = <liquid.GlassTab>[
   liquid.GlassTab(
     icon: Icon(Icons.dashboard_outlined),
     activeIcon: Icon(Icons.dashboard_rounded),
-    label: 'Dashboard',
     semanticLabel: 'Dashboard',
   ),
   liquid.GlassTab(
     icon: Icon(Icons.home_outlined),
     activeIcon: Icon(Icons.home_rounded),
-    label: 'Home',
     semanticLabel: 'Home',
   ),
   liquid.GlassTab(
     icon: Icon(Icons.grid_view_outlined),
     activeIcon: Icon(Icons.grid_view_rounded),
-    label: 'Projects',
     semanticLabel: 'Projects',
   ),
   liquid.GlassTab(
     icon: Icon(Icons.auto_awesome_outlined),
     activeIcon: Icon(Icons.auto_awesome_rounded),
-    label: 'Skills',
     semanticLabel: 'Skills',
   ),
   liquid.GlassTab(
     icon: Icon(Icons.mail_outline_rounded),
     activeIcon: Icon(Icons.mail_rounded),
-    label: 'Contact',
     semanticLabel: 'Contact',
   ),
 ];
@@ -43,19 +38,20 @@ const _bottomTabs = <liquid.GlassTab>[
 /// Holding and dragging across the bar moves the indicator with the pointer;
 /// releasing it snaps to and selects the nearest destination.
 class CustomBottomBar extends ConsumerWidget {
-  const CustomBottomBar({super.key, this.onActionPressed});
+  const CustomBottomBar({super.key, this.onActionPressed, this.scrollController});
 
   final VoidCallback? onActionPressed;
+  final ScrollController? scrollController;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final activeTab = ref.watch(navigationProvider);
-    final compact = MediaQuery.sizeOf(context).width <= 360;
 
     return liquid.GlassTabBar.bottom(
       key: const ValueKey('liquid-glass-bottom-bar'),
       tabs: _bottomTabs,
       selectedIndex: activeTab.index,
+      scrollController: scrollController,
       onTabSelected: (index) {
         final tab = MainTab.values[index];
         if (tab == MainTab.dashboard && onActionPressed != null) {
@@ -64,24 +60,7 @@ class CustomBottomBar extends ConsumerWidget {
         }
         ref.read(navigationProvider.notifier).select(tab);
       },
-      horizontalPadding: 0,
-      verticalPadding: 0,
-      barHeight: compact ? 50 : 58,
-      barBorderRadius: 32,
-      tabPadding: const EdgeInsets.symmetric(horizontal: 1),
-      iconLabelSpacing: compact ? 1 : 2,
-      iconSize: compact ? 19 : 21,
-      labelFontSize: compact ? 9 : 10,
-      selectedLabelStyle: const TextStyle(fontWeight: FontWeight.w700),
-      unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500),
-      indicatorPinchStrength: .42,
-      indicatorExpansion: const EdgeInsets.symmetric(
-        horizontal: 6,
-        vertical: 4,
-      ),
-      magnification: 1.08,
       quality: liquid.GlassQuality.standard,
-      backgroundQuality: liquid.GlassQuality.standard,
     );
   }
 }

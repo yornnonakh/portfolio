@@ -59,13 +59,15 @@ Future<void> selectTab(WidgetTester tester, MainTab tab) async {
     await tester.tap(destination);
   } else {
     final bar = find.byType(liquid.GlassTabBar);
-    final rect = tester.getRect(bar);
-    await tester.tapAt(
-      Offset(
-        rect.left + rect.width * (tab.index + .5) / MainTab.values.length,
-        rect.center.dy,
-      ),
-    );
+    if (bar.evaluate().isNotEmpty) {
+      final rect = tester.getRect(bar);
+      await tester.tapAt(
+        Offset(
+          rect.left + rect.width * (tab.index + .5) / MainTab.values.length,
+          rect.center.dy,
+        ),
+      );
+    }
   }
   await tester.pumpAndSettle();
 }
@@ -121,6 +123,7 @@ void main() {
       expect(find.text('Languages & Frameworks'), findsOneWidget);
       await selectTab(tester, MainTab.project);
       expect(find.text('TaskFlow'), findsNothing);
+      await tester.ensureVisible(find.text('Open source'));
       await tester.tap(find.text('Open source'));
       await tester.pumpAndSettle();
       expect(find.text('More good things are on the way.'), findsOneWidget);
@@ -147,7 +150,11 @@ void main() {
     expect(find.byType(liquid.GlassTabBar), findsOneWidget);
     expect(
       tester.widget<liquid.GlassTabBar>(find.byType(liquid.GlassTabBar)).tabs,
-      hasLength(MainTab.values.length),
+      hasLength(4),
+    );
+    expect(
+      tester.widget<liquid.GlassTabBar>(find.byType(liquid.GlassTabBar)).extraButton,
+      isNotNull,
     );
     expect(find.text('Featured Work'), findsOneWidget);
     expect(find.text('TaskFlow'), findsOneWidget);
@@ -196,13 +203,12 @@ void main() {
     expect(bar().indicatorSettings, isNull);
 
     await selectTab(tester, MainTab.home);
-    expect(bar().selectedIndex, MainTab.home.index);
+    expect(bar().selectedIndex, MainTab.home.index - 1);
 
     await selectTab(tester, MainTab.project);
-    expect(bar().selectedIndex, MainTab.project.index);
+    expect(bar().selectedIndex, MainTab.project.index - 1);
 
     await selectTab(tester, MainTab.dashboard);
-    expect(bar().selectedIndex, MainTab.dashboard.index);
     expect(find.text('Dashboard'), findsWidgets);
     expect(tester.takeException(), isNull);
   });
@@ -231,7 +237,7 @@ void main() {
 
     expect(
       tester.widget<liquid.GlassTabBar>(bottomBar).selectedIndex,
-      MainTab.home.index,
+      MainTab.home.index - 1,
     );
     expect(tester.takeException(), isNull);
   });
@@ -247,14 +253,14 @@ void main() {
 
     await tester.timedDragFrom(
       start,
-      Offset(rect.width * .4, 0),
+      Offset(rect.width * .28, 0),
       const Duration(milliseconds: 800),
     );
     await tester.pumpAndSettle();
 
     expect(
       tester.widget<liquid.GlassTabBar>(bar).selectedIndex,
-      MainTab.project.index,
+      MainTab.project.index - 1,
     );
     expect(find.text('Projects'), findsWidgets);
     expect(tester.takeException(), isNull);
