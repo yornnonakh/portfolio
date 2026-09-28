@@ -1,11 +1,10 @@
 import 'dart:math' as math;
-import 'dart:ui' show PointerDeviceKind;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as liquid;
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/glass_card.dart';
+import '../../../core/widgets/liquid_glass_segmented_selector.dart';
 import '../../../core/widgets/page_content.dart';
 import '../../../core/widgets/timeline_card.dart';
 import '../../../core/widgets/timeline_entry.dart';
@@ -258,37 +257,14 @@ class _CategorySelector extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ScrollConfiguration(
-      behavior: ScrollConfiguration.of(context).copyWith(
-        dragDevices: const {
-          PointerDeviceKind.touch,
-          PointerDeviceKind.mouse,
-          PointerDeviceKind.stylus,
-          PointerDeviceKind.trackpad,
-          PointerDeviceKind.unknown,
-        },
-        scrollbars: false,
-      ),
-      child: liquid.GlassSegmentedControl.scrollable(
-        key: const ValueKey('project-category-scroll'),
-        segments: [
-          for (final category in ProjectCategory.values)
-            liquid.GlassSegment(
-              id: category,
-              label: category.label,
-              semanticLabel: category.label,
-            ),
-        ],
-        selectedIndex: selected.index,
-        onSegmentSelected: (index) =>
-            onSelected(ProjectCategory.values[index]),
-        useOwnLayer: true,
-        quality: liquid.GlassQuality.standard,
-        height: 46,
-        borderRadius: 14,
-        dragBehavior: liquid.SegmentDragBehavior.scroll,
-        labelPadding: const EdgeInsets.symmetric(horizontal: 14),
-      ),
+    return LiquidGlassSegmentedSelector<ProjectCategory>(
+      controlKey: const ValueKey('project-category-scroll'),
+      options: [
+        for (final category in ProjectCategory.values)
+          LiquidGlassSelectorOption(value: category, label: category.label),
+      ],
+      value: selected,
+      onChanged: onSelected,
     );
   }
 }

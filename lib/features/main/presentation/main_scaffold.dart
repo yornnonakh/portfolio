@@ -74,7 +74,7 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
                   12,
                 ),
                 child: SizedBox(
-                  height: 68,
+                  height: CustomBottomBar.preferredHeight,
                   child: Center(
                     child: ConstrainedBox(
                       constraints: const BoxConstraints(maxWidth: 430),
@@ -150,7 +150,7 @@ class _DesktopHeader extends ConsumerWidget {
               ),
               const Spacer(),
               for (final tab in MainTab.values) ...[
-                NavigationItem(tab: tab, horizontal: true),
+                NavigationItem(tab: tab),
                 const SizedBox(width: 6),
               ],
               const Spacer(),
