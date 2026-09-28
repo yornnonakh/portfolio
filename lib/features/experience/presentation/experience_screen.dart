@@ -63,12 +63,15 @@ class _AnimatedExperienceTimelineState
         ..stop()
         ..value = 0;
     } else {
-      if (!_controller.isAnimating && !_controller.isCompleted) {
-        _controller.forward();
-      }
-      if (!_flowController.isAnimating) {
-        _flowController.repeat(reverse: true);
-      }
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (!mounted) return;
+        if (!_controller.isAnimating && !_controller.isCompleted) {
+          _controller.forward();
+        }
+        if (!_flowController.isAnimating) {
+          _flowController.repeat(reverse: true);
+        }
+      });
     }
   }
 

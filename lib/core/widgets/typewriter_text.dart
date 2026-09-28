@@ -58,7 +58,13 @@ class _TypewriterTextState extends State<TypewriterText>
 
   void _syncAnimation() {
     if (widget.enabled && !_reducedMotion) {
-      if (!_controller.isAnimating) _controller.repeat();
+      if (!_controller.isAnimating) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && widget.enabled && !_reducedMotion && !_controller.isAnimating) {
+            _controller.repeat();
+          }
+        });
+      }
     } else {
       _controller
         ..stop()

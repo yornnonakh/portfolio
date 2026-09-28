@@ -83,9 +83,16 @@ class _PageContentState extends State<PageContent> {
         NotificationListener<ScrollNotification>(
           onNotification: (notification) {
             if (notification.metrics.axis == Axis.vertical) {
-              setState(() {
-                _scrollOffset = notification.metrics.pixels;
-              });
+              final newPixels = notification.metrics.pixels;
+              if ((_scrollOffset - newPixels).abs() > 0.5) {
+                WidgetsBinding.instance.addPostFrameCallback((_) {
+                  if (mounted && (_scrollOffset - newPixels).abs() > 0.5) {
+                    setState(() {
+                      _scrollOffset = newPixels;
+                    });
+                  }
+                });
+              }
             }
             return false;
           },

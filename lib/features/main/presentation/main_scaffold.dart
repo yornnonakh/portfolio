@@ -31,18 +31,21 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
   }
 
   void _showPage(MainTab tab) {
-    if (!_pageController.hasClients ||
-        _pageController.page?.round() == tab.index) {
-      return;
-    }
+    if (!mounted || !_pageController.hasClients) return;
+    if (_pageController.page?.round() == tab.index) return;
 
-    _pageController.animateToPage(
-      tab.index,
-      duration: MediaQuery.disableAnimationsOf(context)
-          ? Duration.zero
-          : const Duration(milliseconds: 280),
-      curve: Curves.easeOutCubic,
-    );
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_pageController.hasClients) return;
+      if (_pageController.page?.round() == tab.index) return;
+
+      _pageController.animateToPage(
+        tab.index,
+        duration: MediaQuery.disableAnimationsOf(context)
+            ? Duration.zero
+            : const Duration(milliseconds: 280),
+        curve: Curves.easeOutCubic,
+      );
+    });
   }
 
   @override

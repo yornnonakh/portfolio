@@ -45,8 +45,12 @@ class _HomeMotionState extends State<HomeMotion> with TickerProviderStateMixin {
     if (!widget.enabled || MediaQuery.disableAnimationsOf(context)) {
       _entranceController.value = 1;
     } else {
-      _entranceController.forward();
-      _ambientController.repeat(reverse: true);
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          _entranceController.forward();
+          _ambientController.repeat(reverse: true);
+        }
+      });
     }
   }
 
