@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/services/link_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/gradient_button.dart';
+import '../../../core/widgets/staggered_reveal.dart';
 import '../../../core/widgets/tag_chip.dart';
 import '../../../data/models/portfolio.dart';
 import '../../main/presentation/navigation_provider.dart';
@@ -25,6 +27,12 @@ Future<void> showProjectDetails(
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(top: Radius.circular(32)),
     ),
+    sheetAnimationStyle: AppMotion.enabledOf(context)
+        ? const AnimationStyle(
+            duration: AppMotion.contentSwap,
+            reverseDuration: AppMotion.navigation,
+          )
+        : AnimationStyle.noAnimation,
     builder: (_) => _ProjectDetails(project: project),
   );
 }
@@ -45,7 +53,7 @@ class _ProjectDetails extends ConsumerWidget {
         26,
         28 + MediaQuery.paddingOf(context).bottom,
       ),
-      child: Column(
+      child: StaggeredReveal(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [

@@ -2,6 +2,7 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/liquid_glass_segmented_selector.dart';
@@ -20,6 +21,18 @@ class ProjectsScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final selected = ref.watch(projectFilterProvider);
     final projects = ref.watch(filteredProjectsProvider);
+    final results = projects.isEmpty
+        ? _IosEmptyState(
+            key: ValueKey('empty-${selected.name}'),
+            onShowAll: () => ref
+                .read(projectFilterProvider.notifier)
+                .select(ProjectCategory.all),
+          )
+        : _AnimatedProjectTimeline(
+            key: const ValueKey('project-results'),
+            projects: projects,
+            onProjectTap: (project) => showProjectDetails(context, project),
+          );
     return PageContent(
       title: 'Projects',
       children: [
@@ -29,17 +42,22 @@ class ProjectsScreen extends ConsumerWidget {
               ref.read(projectFilterProvider.notifier).select(category),
         ),
         const SizedBox(height: 22),
-        if (projects.isEmpty)
-          _IosEmptyState(
-            onShowAll: () => ref
-                .read(projectFilterProvider.notifier)
-                .select(ProjectCategory.all),
-          )
-        else
-          _AnimatedProjectTimeline(
-            projects: projects,
-            onProjectTap: (project) => showProjectDetails(context, project),
-          ),
+        AnimatedSwitcher(
+          duration: AppMotion.duration(context, AppMotion.contentSwap),
+          switchInCurve: AppMotion.enterCurve,
+          switchOutCurve: AppMotion.exitCurve,
+          transitionBuilder: (child, animation) {
+            final slide = Tween<Offset>(
+              begin: const Offset(0, .025),
+              end: Offset.zero,
+            ).animate(animation);
+            return FadeTransition(
+              opacity: animation,
+              child: SlideTransition(position: slide, child: child),
+            );
+          },
+          child: results,
+        ),
       ],
     );
   }
@@ -47,6 +65,7 @@ class ProjectsScreen extends ConsumerWidget {
 
 class _AnimatedProjectTimeline extends StatefulWidget {
   const _AnimatedProjectTimeline({
+    super.key,
     required this.projects,
     required this.onProjectTap,
   });
@@ -63,45 +82,57 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
     with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _flowController;
-  bool _reducedMotion = false;
+  bool _motionEnabled = true;
+  bool _active = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1050),
+      duration: AppMotion.screenEntrance,
     );
     _flowController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
+      duration: AppMotion.timelineFlow,
     );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reducedMotion = MediaQuery.disableAnimationsOf(context);
-    final tickerEnabled = TickerMode.valuesOf(context).enabled;
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
-      'Test',
-    );
-    if (_reducedMotion || !tickerEnabled || isTest) {
+    _syncMotion();
+  }
+
+  void _syncMotion() {
+    _motionEnabled = AppMotion.enabledOf(context);
+    final visible = TickerMode.valuesOf(context).enabled;
+
+    if (!_motionEnabled) {
       _controller.value = 1;
       _flowController
         ..stop()
         ..value = 0;
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        if (!_controller.isAnimating && !_controller.isCompleted) {
-          _controller.forward();
-        }
-        if (!_flowController.isAnimating) {
-          _flowController.repeat(reverse: true);
-        }
-      });
+      _active = false;
+      return;
     }
+
+    if (!visible) {
+      _controller
+        ..stop()
+        ..value = 0;
+      _flowController
+        ..stop()
+        ..value = 0;
+      _active = false;
+      return;
+    }
+
+    if (!_active) {
+      _controller.forward(from: 0);
+      _flowController.repeat(reverse: true);
+    }
+    _active = true;
   }
 
   @override
@@ -113,10 +144,12 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
           (entry) => entry.value.id != widget.projects[entry.key].id,
         );
     if (!changed) return;
-    if (_reducedMotion) {
+    if (!_motionEnabled) {
       _controller.value = 1;
-    } else {
+    } else if (_active) {
       _controller.forward(from: 0);
+    } else {
+      _controller.value = 0;
     }
   }
 
@@ -152,7 +185,7 @@ class _AnimatedProjectTimelineState extends State<_AnimatedProjectTimeline>
   }
 
   double _projectProgress(int index, double stagger) {
-    if (_reducedMotion) return 1;
+    if (!_motionEnabled) return 1;
     final start = math.min(index * stagger, .48);
     final end = math.min(start + .58, 1.0);
     return Interval(
@@ -273,7 +306,7 @@ class _CategorySelector extends StatelessWidget {
 }
 
 class _IosEmptyState extends StatelessWidget {
-  const _IosEmptyState({required this.onShowAll});
+  const _IosEmptyState({super.key, required this.onShowAll});
 
   final VoidCallback onShowAll;
 

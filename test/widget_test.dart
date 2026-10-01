@@ -6,7 +6,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as liquid;
 import 'package:portfolio/app.dart';
+import 'package:portfolio/core/motion/app_motion.dart';
 import 'package:portfolio/core/widgets/glass_card.dart' as portfolio;
+import 'package:portfolio/core/widgets/staggered_reveal.dart';
 import 'package:portfolio/core/services/link_service.dart';
 import 'package:portfolio/data/models/portfolio.dart';
 import 'package:portfolio/data/portfolio_content.dart';
@@ -107,6 +109,105 @@ void main() {
     );
   });
 
+  testWidgets('shared screen reveal staggers content and completes', (
+    tester,
+  ) async {
+    await tester.pumpWidget(
+      const MotionScope(
+        enabled: true,
+        child: MaterialApp(
+          home: Scaffold(
+            body: StaggeredReveal(
+              children: [Text('First'), Text('Second'), Text('Third')],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final reveal = find.byType(StaggeredReveal);
+    final opacity = find.descendant(of: reveal, matching: find.byType(Opacity));
+    expect(
+      tester.widgetList<Opacity>(opacity).any((item) => item.opacity < 1),
+      isTrue,
+    );
+
+    await tester.pump(AppMotion.screenEntrance);
+
+    expect(
+      tester.widgetList<Opacity>(opacity).every((item) => item.opacity == 1),
+      isTrue,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('global motion switch resolves reveals immediately', (
+    tester,
+  ) async {
+    var pressed = false;
+    await tester.pumpWidget(
+      MotionScope(
+        enabled: false,
+        child: MaterialApp(
+          home: Scaffold(
+            body: StaggeredReveal(
+              children: [
+                TextButton(
+                  onPressed: () => pressed = true,
+                  child: const Text('Ready now'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+
+    final opacity = tester.widget<Opacity>(
+      find.descendant(
+        of: find.byType(StaggeredReveal),
+        matching: find.byType(Opacity),
+      ),
+    );
+    expect(opacity.opacity, 1);
+
+    await tester.tap(find.text('Ready now'));
+    expect(pressed, isTrue);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('motion-enabled tabs animate only while active', (tester) async {
+    tester.view.devicePixelRatio = 1;
+    tester.view.physicalSize = const Size(1440, 1000);
+    addTearDown(() {
+      tester.view.resetPhysicalSize();
+      tester.view.resetDevicePixelRatio();
+    });
+
+    await tester.pumpWidget(
+      const ProviderScope(child: PortfolioApp(enableMotion: true)),
+    );
+    await tester.pump();
+
+    await tester.tap(find.byKey(const ValueKey('nav-skill')));
+    await tester.pump();
+    expect(find.text('Languages & Frameworks'), findsOneWidget);
+    await tester.pump(const Duration(milliseconds: 1200));
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(const ValueKey('nav-project')));
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 1200));
+    expect(find.text('TaskFlow'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pump();
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets(
     'primary navigation, filters, empty state and project contact flow work',
     (tester) async {
@@ -153,7 +254,9 @@ void main() {
       hasLength(4),
     );
     expect(
-      tester.widget<liquid.GlassTabBar>(find.byType(liquid.GlassTabBar)).extraButton,
+      tester
+          .widget<liquid.GlassTabBar>(find.byType(liquid.GlassTabBar))
+          .extraButton,
       isNotNull,
     );
     expect(find.text('Featured Work'), findsOneWidget);
@@ -359,6 +462,14 @@ void main() {
       await tester.tap(find.byTooltip('Copy email address'));
       await tester.pumpAndSettle();
       expect(find.text('Email address copied.'), findsOneWidget);
+
+      links.succeeds = true;
+      await tester.tap(find.byTooltip('GitHub'));
+      await tester.pumpAndSettle();
+      expect(links.opened.last, Uri.parse('https://github.com/yornnonakh'));
+      expect(find.byTooltip('LinkedIn · Coming soon'), findsOneWidget);
+      expect(find.byTooltip('X · Coming soon'), findsOneWidget);
+      expect(find.byTooltip('Dribbble · Coming soon'), findsOneWidget);
     },
   );
 

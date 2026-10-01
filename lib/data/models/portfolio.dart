@@ -32,6 +32,7 @@ class PortfolioProfile {
     required this.values,
     required this.socials,
     this.avatarAsset,
+    this.resumeUrl,
     this.available = true,
   });
 
@@ -52,6 +53,7 @@ class PortfolioProfile {
   final List<String> values;
   final List<SocialProfile> socials;
   final String? avatarAsset;
+  final String? resumeUrl;
 }
 
 class PortfolioStat {

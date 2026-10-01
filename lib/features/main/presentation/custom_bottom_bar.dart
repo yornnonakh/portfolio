@@ -1,34 +1,45 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:liquid_glass_widgets/liquid_glass_widgets.dart' as liquid;
+import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/app_colors.dart';
 import 'navigation_provider.dart';
 
 const _navigationDestinations = <_NavigationDestination>[
   _NavigationDestination(
-    tab: MainTab.dashboard,colors: AppColors.primary,
+    tab: MainTab.dashboard,
+    colors: AppColors.primary,
     icon: Icons.dashboard_outlined,
-    selectedIcon: Icons.dashboard_rounded,color: AppColors.primary,
+    selectedIcon: Icons.dashboard_rounded,
+    color: AppColors.primary,
   ),
   _NavigationDestination(
-    tab: MainTab.home, colors: AppColors.primary,
+    tab: MainTab.home,
+    colors: AppColors.primary,
     icon: Icons.home_outlined,
-    selectedIcon: Icons.home_rounded, color: AppColors.primary,
+    selectedIcon: Icons.home_rounded,
+    color: AppColors.primary,
   ),
   _NavigationDestination(
-    tab: MainTab.project, colors: AppColors.primary,
+    tab: MainTab.project,
+    colors: AppColors.primary,
     icon: Icons.grid_view_outlined,
-    selectedIcon: Icons.grid_view_rounded, color: AppColors.primary,
+    selectedIcon: Icons.grid_view_rounded,
+    color: AppColors.primary,
   ),
   _NavigationDestination(
-    tab: MainTab.skill, colors: AppColors.primary,
+    tab: MainTab.skill,
+    colors: AppColors.primary,
     icon: Icons.auto_awesome_outlined,
-    selectedIcon: Icons.auto_awesome_rounded,color: AppColors.primary
+    selectedIcon: Icons.auto_awesome_rounded,
+    color: AppColors.primary,
   ),
   _NavigationDestination(
-    tab: MainTab.contact, colors: AppColors.primary,
+    tab: MainTab.contact,
+    colors: AppColors.primary,
     icon: Icons.mail_outline_rounded,
-    selectedIcon: Icons.mail_rounded,color: AppColors.primary
+    selectedIcon: Icons.mail_rounded,
+    color: AppColors.primary,
   ),
 ];
 
@@ -125,10 +136,8 @@ class NavigationItem extends ConsumerWidget {
       selected: selected,
       label: tab.label,
       child: AnimatedContainer(
-        duration: MediaQuery.disableAnimationsOf(context)
-            ? Duration.zero
-            : const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
+        duration: AppMotion.duration(context, AppMotion.feedback),
+        curve: AppMotion.enterCurve,
         decoration: BoxDecoration(
           color: selected
               ? Theme.of(context).colorScheme.primary
@@ -177,7 +186,9 @@ class _NavigationDestination {
   const _NavigationDestination({
     required this.tab,
     required this.icon,
-    required this.selectedIcon, required Color color, required Color colors,
+    required this.selectedIcon,
+    required Color color,
+    required Color colors,
   });
 
   final MainTab tab;

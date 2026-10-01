@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/motion/app_motion.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/page_content.dart';
 import '../../../core/widgets/timeline_card.dart';
@@ -35,44 +36,70 @@ class _AnimatedExperienceTimelineState
     with TickerProviderStateMixin {
   late final AnimationController _controller;
   late final AnimationController _flowController;
-  bool _reducedMotion = false;
+  bool _motionEnabled = true;
+  bool _active = false;
 
   @override
   void initState() {
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1050),
+      duration: AppMotion.screenEntrance,
     );
     _flowController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3200),
+      duration: AppMotion.timelineFlow,
     );
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reducedMotion = MediaQuery.disableAnimationsOf(context);
-    final isTest = WidgetsBinding.instance.runtimeType.toString().contains(
-      'Test',
-    );
-    if (_reducedMotion || isTest) {
+    _syncMotion();
+  }
+
+  @override
+  void didUpdateWidget(covariant _AnimatedExperienceTimeline oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final changed =
+        oldWidget.experience.length != widget.experience.length ||
+        oldWidget.experience.asMap().entries.any(
+          (entry) =>
+              entry.value.company != widget.experience[entry.key].company ||
+              entry.value.role != widget.experience[entry.key].role,
+        );
+    if (changed && _active) _controller.forward(from: 0);
+  }
+
+  void _syncMotion() {
+    _motionEnabled = AppMotion.enabledOf(context);
+    final visible = TickerMode.valuesOf(context).enabled;
+
+    if (!_motionEnabled) {
       _controller.value = 1;
       _flowController
         ..stop()
         ..value = 0;
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (!mounted) return;
-        if (!_controller.isAnimating && !_controller.isCompleted) {
-          _controller.forward();
-        }
-        if (!_flowController.isAnimating) {
-          _flowController.repeat(reverse: true);
-        }
-      });
+      _active = false;
+      return;
     }
+
+    if (!visible) {
+      _controller
+        ..stop()
+        ..value = 0;
+      _flowController
+        ..stop()
+        ..value = 0;
+      _active = false;
+      return;
+    }
+
+    if (!_active) {
+      _controller.forward(from: 0);
+      _flowController.repeat(reverse: true);
+    }
+    _active = true;
   }
 
   @override
@@ -107,7 +134,7 @@ class _AnimatedExperienceTimelineState
   }
 
   double _entryProgress(int index, double stagger) {
-    if (_reducedMotion) return 1;
+    if (!_motionEnabled) return 1;
     final start = math.min(index * stagger, .48);
     final end = math.min(start + .58, 1.0);
     final interval = Interval(start, end, curve: Curves.easeOutCubic);

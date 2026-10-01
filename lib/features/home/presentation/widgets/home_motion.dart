@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 import 'package:flutter/material.dart';
+import '../../../../core/motion/app_motion.dart';
 import '../../../../core/theme/app_colors.dart';
 
 /// Adds a restrained entrance and ambient light movement to the home screen.
@@ -18,18 +19,18 @@ class _HomeMotionState extends State<HomeMotion> with TickerProviderStateMixin {
   late final AnimationController _entranceController;
   late final AnimationController _ambientController;
   late final Animation<double> _entrance;
-  bool _motionConfigured = false;
+  bool _active = false;
 
   @override
   void initState() {
     super.initState();
     _entranceController = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 1100),
+      duration: AppMotion.screenEntrance,
     );
     _ambientController = AnimationController(
       vsync: this,
-      duration: const Duration(seconds: 14),
+      duration: AppMotion.ambient,
     );
     _entrance = CurvedAnimation(
       parent: _entranceController,
@@ -40,18 +41,46 @@ class _HomeMotionState extends State<HomeMotion> with TickerProviderStateMixin {
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    if (_motionConfigured) return;
-    _motionConfigured = true;
-    if (!widget.enabled || MediaQuery.disableAnimationsOf(context)) {
-      _entranceController.value = 1;
-    } else {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (mounted) {
-          _entranceController.forward();
-          _ambientController.repeat(reverse: true);
-        }
-      });
+    _syncMotion();
+  }
+
+  @override
+  void didUpdateWidget(covariant HomeMotion oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _syncMotion();
+  }
+
+  void _syncMotion() {
+    final motionEnabled = widget.enabled && AppMotion.enabledOf(context);
+    final visible = TickerMode.valuesOf(context).enabled;
+
+    if (!motionEnabled) {
+      _entranceController
+        ..stop()
+        ..value = 1;
+      _ambientController
+        ..stop()
+        ..value = 0;
+      _active = false;
+      return;
     }
+
+    if (!visible) {
+      _entranceController
+        ..stop()
+        ..value = 0;
+      _ambientController
+        ..stop()
+        ..value = 0;
+      _active = false;
+      return;
+    }
+
+    if (!_active) {
+      _entranceController.forward(from: 0);
+      _ambientController.repeat(reverse: true);
+    }
+    _active = true;
   }
 
   @override
@@ -68,13 +97,15 @@ class _HomeMotionState extends State<HomeMotion> with TickerProviderStateMixin {
       children: [
         Positioned.fill(
           child: IgnorePointer(
-            child: AnimatedBuilder(
-              animation: _ambientController,
-              builder: (context, child) => CustomPaint(
-                painter: _HomeAmbientPainter(_ambientController.value),
-                child: child,
+            child: RepaintBoundary(
+              child: AnimatedBuilder(
+                animation: _ambientController,
+                builder: (context, child) => CustomPaint(
+                  painter: _HomeAmbientPainter(_ambientController.value),
+                  child: child,
+                ),
+                child: const SizedBox.expand(),
               ),
-              child: const SizedBox.expand(),
             ),
           ),
         ),

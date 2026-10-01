@@ -35,13 +35,18 @@ abstract final class PortfolioContent {
       'Performance',
       'Design detail',
     ],
-    // Add your profile URLs to enable the social buttons.
+    // Add only verified profile URLs; profiles without one stay disabled.
     socials: [
-      SocialProfile(SocialPlatform.github, 'GitHub'),
+      SocialProfile(
+        SocialPlatform.github,
+        'GitHub',
+        url: 'https://github.com/yornnonakh',
+      ),
       SocialProfile(SocialPlatform.linkedIn, 'LinkedIn'),
       SocialProfile(SocialPlatform.x, 'X'),
       SocialProfile(SocialPlatform.dribbble, 'Dribbble'),
     ],
+    resumeUrl: 'https://yornnona.com/resume.pdf',
   );
 
   static const projects = [

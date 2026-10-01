@@ -9,6 +9,7 @@ import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/gradient_button.dart';
 import '../../../core/widgets/info_row.dart';
 import '../../../core/widgets/page_content.dart';
+import '../../../core/widgets/staggered_reveal.dart';
 import '../../../data/models/portfolio.dart';
 import '../../../data/portfolio_providers.dart';
 
@@ -124,19 +125,29 @@ class ContactScreen extends ConsumerWidget {
       children: [
         LayoutBuilder(
           builder: (context, constraints) {
-            if (constraints.maxWidth >= 760) {
-              return Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(child: introduction),
-                  const SizedBox(width: 28),
-                  Expanded(child: details),
-                ],
-              );
-            }
-            return Column(
+            return StaggeredReveal(
               crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [introduction, const SizedBox(height: 18), details],
+              children: [introduction, details],
+              builder: (context, children) {
+                if (constraints.maxWidth >= 760) {
+                  return Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Expanded(child: children[0]),
+                      const SizedBox(width: 28),
+                      Expanded(child: children[1]),
+                    ],
+                  );
+                }
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    children[0],
+                    const SizedBox(height: 18),
+                    children[1],
+                  ],
+                );
+              },
             );
           },
         ),

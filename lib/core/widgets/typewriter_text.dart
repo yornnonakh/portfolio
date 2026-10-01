@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../motion/app_motion.dart';
+
 /// Repeats a typewriter-style text loop while keeping a complete semantic
 /// label for screen readers.
 class TypewriterText extends StatefulWidget {
@@ -41,7 +43,7 @@ class _TypewriterTextState extends State<TypewriterText>
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    _reducedMotion = MediaQuery.disableAnimationsOf(context);
+    _reducedMotion = !AppMotion.enabledOf(context);
     _syncAnimation();
   }
 
@@ -60,7 +62,10 @@ class _TypewriterTextState extends State<TypewriterText>
     if (widget.enabled && !_reducedMotion) {
       if (!_controller.isAnimating) {
         WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && widget.enabled && !_reducedMotion && !_controller.isAnimating) {
+          if (mounted &&
+              widget.enabled &&
+              !_reducedMotion &&
+              !_controller.isAnimating) {
             _controller.repeat();
           }
         });

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../core/motion/app_motion.dart';
 import '../../../core/widgets/availability_badge.dart';
 import '../../../core/widgets/glass_background.dart';
 import '../../../core/widgets/theme_toggle_button.dart';
@@ -13,9 +14,13 @@ import 'custom_bottom_bar.dart';
 import 'navigation_provider.dart';
 
 class MainScaffold extends ConsumerStatefulWidget {
-  const MainScaffold({super.key, this.enableHomeMotion = true});
+  const MainScaffold({
+    super.key,
+    bool enableHomeMotion = true,
+    bool? motionEnabled,
+  }) : motionEnabled = motionEnabled ?? enableHomeMotion;
 
-  final bool enableHomeMotion;
+  final bool motionEnabled;
 
   @override
   ConsumerState<MainScaffold> createState() => _MainScaffoldState();
@@ -38,13 +43,16 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
       if (!mounted || !_pageController.hasClients) return;
       if (_pageController.page?.round() == tab.index) return;
 
-      _pageController.animateToPage(
-        tab.index,
-        duration: MediaQuery.disableAnimationsOf(context)
-            ? Duration.zero
-            : const Duration(milliseconds: 280),
-        curve: Curves.easeOutCubic,
-      );
+      final duration = AppMotion.duration(context, AppMotion.navigation);
+      if (duration == Duration.zero) {
+        _pageController.jumpToPage(tab.index);
+      } else {
+        _pageController.animateToPage(
+          tab.index,
+          duration: duration,
+          curve: AppMotion.enterCurve,
+        );
+      }
     });
   }
 
@@ -92,14 +100,17 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
               if (wide) SafeArea(bottom: false, child: const _DesktopHeader()),
               Expanded(
                 child: wide
-                    ? IndexedStack(index: tab.index, children: _pages(tab))
+                    ? IndexedStack(
+                        index: tab.index,
+                        children: _pages(context, tab, animateForDesktop: true),
+                      )
                     : PageView(
                         key: const ValueKey('section-page-view'),
                         controller: _pageController,
                         onPageChanged: (index) => ref
                             .read(navigationProvider.notifier)
                             .select(MainTab.values[index]),
-                        children: _pages(tab),
+                        children: _pages(context, tab),
                       ),
               ),
             ],
@@ -109,19 +120,61 @@ class _MainScaffoldState extends ConsumerState<MainScaffold> {
     );
   }
 
-  List<Widget> _pages(MainTab tab) => [
-    TickerMode(
-      enabled: tab == MainTab.dashboard,
-      child: DashboardScreen(motionEnabled: widget.enableHomeMotion),
-    ),
-    TickerMode(
-      enabled: tab == MainTab.home,
-      child: HomeScreen(motionEnabled: widget.enableHomeMotion),
-    ),
-    TickerMode(enabled: tab == MainTab.project, child: const ProjectsScreen()),
-    TickerMode(enabled: tab == MainTab.skill, child: const SkillsScreen()),
-    TickerMode(enabled: tab == MainTab.contact, child: const ContactScreen()),
-  ];
+  List<Widget> _pages(
+    BuildContext context,
+    MainTab tab, {
+    bool animateForDesktop = false,
+  }) {
+    final pages = <Widget>[
+      DashboardScreen(motionEnabled: widget.motionEnabled),
+      HomeScreen(motionEnabled: widget.motionEnabled),
+      const ProjectsScreen(),
+      const SkillsScreen(),
+      const ContactScreen(),
+    ];
+
+    return [
+      for (var index = 0; index < pages.length; index++)
+        _TabPage(
+          active: tab.index == index,
+          animate: animateForDesktop,
+          duration: AppMotion.duration(context, AppMotion.navigation),
+          child: pages[index],
+        ),
+    ];
+  }
+}
+
+class _TabPage extends StatelessWidget {
+  const _TabPage({
+    required this.active,
+    required this.animate,
+    required this.duration,
+    required this.child,
+  });
+
+  final bool active;
+  final bool animate;
+  final Duration duration;
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final content = TickerMode(enabled: active, child: child);
+    if (!animate) return content;
+
+    return AnimatedOpacity(
+      opacity: active ? 1 : 0,
+      duration: duration,
+      curve: AppMotion.enterCurve,
+      child: AnimatedSlide(
+        offset: active ? Offset.zero : const Offset(.025, 0),
+        duration: duration,
+        curve: AppMotion.enterCurve,
+        child: content,
+      ),
+    );
+  }
 }
 
 class _DesktopHeader extends ConsumerWidget {

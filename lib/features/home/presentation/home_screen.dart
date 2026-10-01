@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:portfolio/core/services/link_service.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/glass_card.dart';
 import '../../../core/widgets/page_content.dart';
@@ -106,7 +107,7 @@ class HomeScreen extends ConsumerWidget {
 
 // Kept as a dense fallback layout for future embedded/landscape surfaces.
 // ignore: unused_element
-class _CompactHomeScreen extends StatelessWidget {
+class _CompactHomeScreen extends ConsumerWidget {
   const _CompactHomeScreen({
     required this.profile,
     required this.onProjects,
@@ -118,7 +119,7 @@ class _CompactHomeScreen extends StatelessWidget {
   final bool animateRole;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(48, 14, 48, 132),
       child: Center(
@@ -218,13 +219,23 @@ class _CompactHomeScreen extends StatelessWidget {
                     borderRadius: 22,
                     padding: EdgeInsets.zero,
                     semanticLabel: 'Download resume',
-                    onTap: () => ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Add your resume URL in portfolio_content.dart.',
-                        ),
-                      ),
-                    ),
+                    onTap: () {
+                      if (profile.resumeUrl != null) {
+                        openPortfolioLink(
+                          context,
+                          ref,
+                          Uri.parse(profile.resumeUrl!),
+                        );
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(
+                            content: Text(
+                              'Add your resume URL in portfolio_content.dart.',
+                            ),
+                          ),
+                        );
+                      }
+                    },
                     child: const SizedBox(
                       width: 42,
                       height: 42,
